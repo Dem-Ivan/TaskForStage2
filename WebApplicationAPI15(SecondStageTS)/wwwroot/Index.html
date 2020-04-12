@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+
+    
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Афиша объявлений</title>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" rel="stylesheet" />
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+    </head>
+    <body>
+        <h2>Список Объявлений</h2>
+        <form name="announcementForm">
+            <input type="hidden" name="id" value="0" />
+            <div class="form-group col-md-5">
+                <label for="name">Имя:</label>
+                <input class="form-control" name="name" />
+            </div>
+            <div class="form-group col-md-5">
+                <label for="name">Текст:</label>
+                <input class="form-control" name="Text" />
+            </div>
+            <div class="form-group col-md-5">
+                <label for="name">Image:</label>
+                <input class="form-control" name="Image" />
+            </div>
+            
+            <div class="form-group col-md-5" >
+                <div class="g-recaptcha" data-sitekey="6Lc9J-YUAAAAAJfiJm7NlbBmlLkRX0EMtH4iQE4w"></div>              
+            </div>
+
+            <div class="panel-body">
+                <button type="submit" id="submit" class="btn btn-primary">Сохранить</button>
+                <button type="reset" id="reset" class="btn btn-primary">Сбросить</button>
+                <button type="next" id="next" class="btn btn-primary">След.стр.</button>
+            </div>
+
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <p><img src="MyImages/3.png" /></p>
+                </div>
+                <input type="text" class="form-control" placeholder="Captcha Code" asp-for="CaptchaCode" maxlength="4" />
+                <span asp-validation-for="CaptchaCode" class="text-danger"></span>
+            </div>
+        </form>
+        <table class="table table-condensed table-striped  col-md-6">
+            <thead><tr><th>Id</th><th>№</th><th>Имя</th><th>Текст</th><th>Rating</th><th>Image</th></tr></thead>
+            <tbody>
+            </tbody>
+        </table>
+
+
+
+        <script>			
+            // Получение всех объявдений (пользователей GetUsers | Работает
+			console.log("мы 1");
+            async function GetAnnouncements(page, pageSize,searchString,userId,sortOrder) {
+                // отправляет запрос и получаем ответ
+				console.log("мы вошли в метод Get()");
+                const response = await fetch("/api/announcements/" + page + "/" + pageSize + "/" + searchString + "/" + userId + "/" + sortOrder , {
+                    method: "GET",
+                    headers: { "Accept": "application/json", "Content-Type": "application/json" }
+                });
+                // если запрос прошел нормально
+                 console.log("До проверки");
+                if (response.ok === true) {
+                    // получаем данные
+                    console.log("Запрос прошел нормально");
+                    const announcements = await response.json();
+                    let rows = document.querySelector("tbody");
+                    announcements.forEach(announcement => {
+                        // добавляем полученные элементы в таблицу
+                        rows.append(row(announcement));
+                    });
+                }
+            }
+            // Получение одного пользователя| Работает
+            async function GetAnnouncement(id) {
+                const response = await fetch("/api/announcement/" + id, {
+                    method: "GET",
+                    headers: { "Accept": "application/json", "Content-Type": "application/json" }
+                });
+                if (response.ok === true) {
+                    const announcement = await response.json();
+                    const form = document.forms["announcementForm"];
+                    form.elements["id"].value = announcement.id;
+                    form.elements["name"].value = announcement.user.name;
+                    form.elements["Text"].value = announcement.text;
+                    form.elements["Image"].value = announcement.image;
+
+                    console.log(announcement.id);
+                    console.log("announcement.user.name = " + announcement.user.name);
+                    console.log("announcement = " + announcement["text"]);
+                }
+            }
+
+            //Выдача изобрадения для данного пользователя
+            async function GetImage(ImageName) {
+                console.log("I am in GetImage()");
+                const response = await fetch("/api/announcement/" + ImageName, {
+                    method: "GET",
+                    headers: { "Accept": "application/string", "Content-Type": "application/jpg" }
+                });
+                console.log("GetImage() is finish");
+            }
+            // Добавление объявления (пользователя CreateUser| Работает
+            async function CreateAnnouncement(userName, announcementText, announcementImage) {
+
+                const response = await fetch("api/announcement", {
+                    method: "POST",
+                    headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user: { name: userName },
+                        Text: announcementText,
+                        Image: announcementImage
+                    })
+                });
+                if (response.ok === true) {
+                    const announcement = await response.json();
+                    reset();
+                    document.querySelector("tbody").append(row(announcement));
+                }
+            }
+            // Изменение объявления (пользователя EditUser
+            async function EditAnnouncement(announcementId, userName, announcementText, announcementImage) {
+                console.log("I am in method PUT");
+                console.log("userName = " + userName);
+
+                const response = await fetch("api/announcement", {
+                    method: "PUT",
+                    headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id: parseInt(announcementId, 10),// parseInt
+                        user: { name: userName },
+                        Text: announcementText,
+                        Image: announcementImage
+                    })
+                });
+                console.log("response = " + response.Ok);
+                if (response.ok === true) {
+                    const announcement = await response.json();
+                    console.log("I am in method PUT, i traid tu us method reset()");
+                    reset();
+                    console.log("I am in method PUT, after method reset()");
+                    document.querySelector("tr[data-rowid='" + announcement.id + "']").replaceWith(row(announcement));
+                }
+            }
+            // Удаление объявления
+            async function DeleteAnnouncement(id) {
+                const response = await fetch("/api/announcement/" + id, {
+                    method: "DELETE",
+                    headers: { "Accept": "application/json", "Content-Type": "application/json" }
+                });
+                if (response.ok === true) {
+                    const announcement = await response.json();
+                    document.querySelector("tr[data-rowid='" + announcement.id + "']").remove();
+                }
+               
+            }
+
+            // сброс формы
+            function reset() {
+                
+                const form = document.forms["announcementForm"];
+                form.reset();
+                form.elements["id"].value = 0;
+             
+            }
+            // создание строки для таблицы | Работает, за исключением значений полей
+            function row(announcement) {
+				console.log("мы 2");
+                const tr = document.createElement("tr");
+                tr.setAttribute("data-rowid", announcement.id);
+
+                const idTd = document.createElement("td");
+                idTd.append(announcement.id);
+                tr.append(idTd);
+
+                const OrNumTd = document.createElement("td");
+                OrNumTd.append(announcement.orderNumber);
+                tr.append(OrNumTd);
+
+                const UsNameTd = document.createElement("td");
+                UsNameTd.append(announcement.user.name);
+                tr.append(UsNameTd);
+
+                const textTd = document.createElement("td");
+                textTd.append(announcement.text);
+                tr.append(textTd);
+
+                //const ImageTd = document.createElement("td");
+                //ImageTd.append(announcement.image);
+                //tr.append(ImageTd);
+
+
+                const RatingTd = document.createElement("td");
+                RatingTd.append(announcement.rating);
+                tr.append(RatingTd);
+
+                const linksTd = document.createElement("td");
+
+                //////////////////////////////
+              
+                const ImageLink = document.createElement("a");
+                ImageLink.setAttribute("data-id", announcement.id);
+                ImageLink.setAttribute("style", "cursor:pointer;padding:15px;");
+                ImageLink.append(announcement.image);
+               
+                ImageLink.addEventListener("click", e => {
+
+                    e.preventDefault();
+                    GetImage(announcement.image);
+                });
+                linksTd.append(ImageLink);
+              
+                ////////////////////////////
+
+                const editLink = document.createElement("a");
+                editLink.setAttribute("data-id", announcement.id);
+                editLink.setAttribute("style", "cursor:pointer;padding:15px;");
+                editLink.append("Изменить");
+                editLink.addEventListener("click", e => {
+
+                    e.preventDefault();
+                    GetAnnouncement(announcement.id);
+                });
+                linksTd.append(editLink);
+
+                const removeLink = document.createElement("a");
+                removeLink.setAttribute("data-id", announcement.id);
+                removeLink.setAttribute("style", "cursor:pointer;padding:15px;");
+                removeLink.append("Удалить");
+                removeLink.addEventListener("click", e => {
+
+                    e.preventDefault();
+                    DeleteAnnouncement(announcement.id);
+                });
+
+                linksTd.append(removeLink);
+                tr.appendChild(linksTd);
+
+                return tr;
+            }
+            // сброс значений формы
+            document.getElementById("reset").click(function (e) {
+
+                e.preventDefault();
+                reset();
+            })
+
+            // отправка формы | Работает           
+            document.forms["announcementForm"].addEventListener("submit", e => {
+                e.preventDefault();
+                const form = document.forms["announcementForm"];
+                const id = form.elements["id"].value;
+                const userName = form.elements["name"].value;
+                const announcementText = form.elements["Text"].value;
+                const announcementImage = form.elements["Image"].value;
+                if (id == 0)
+                    CreateAnnouncement(userName, announcementText, announcementImage);
+                else
+                    EditAnnouncement(id, userName, announcementText, announcementImage);
+			});
+
+		
+			GetAnnouncements(1, 5, " ", 0, 0);
+          
+        </script>
+    </body>
+</html>
