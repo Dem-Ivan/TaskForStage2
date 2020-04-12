@@ -1,12 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
-using WebApplicationAPI15_SecondStageTS_.dto;
-using WebApplicationAPI15_SecondStageTS_.Models;
 
 namespace WebApplicationAPI15_SecondStageTS_.Services
 {

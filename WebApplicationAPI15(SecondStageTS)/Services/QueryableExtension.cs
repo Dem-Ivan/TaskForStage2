@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
-using WebApplicationAPI15_SecondStageTS_.dto;
 
 namespace WebApplicationAPI15_SecondStageTS_.Services
 {

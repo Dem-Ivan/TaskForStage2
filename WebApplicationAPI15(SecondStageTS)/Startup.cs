@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using WebApplicationAPI15_SecondStageTS_.Models;
 using AutoMapper;
-using Microsoft.Extensions.FileProviders;
-using System.IO;
 using WebApplicationAPI15_SecondStageTS_.Options;
 using WebApplicationAPI15_SecondStageTS_.Services;
 

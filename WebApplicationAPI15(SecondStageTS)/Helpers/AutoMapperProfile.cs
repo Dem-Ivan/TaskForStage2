@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using AutoMapper;
 using WebApplicationAPI15_SecondStageTS_.dto;
 using WebApplicationAPI15_SecondStageTS_.Models;
-using WebApplicationAPI15_SecondStageTS_.Services;
 
 namespace WebApplicationAPI15_SecondStageTS_.Helpers
 {

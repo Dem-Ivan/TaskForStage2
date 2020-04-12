@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -23,8 +22,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _appEnwironment;
         private readonly IRecaptchaService _recaptcha;
-        private IConfiguration Configuration;
-        private int MaxAnnouncementCount;
+        private IConfiguration Configuration;      
        
         public AnnouncementsController(ApplicationContext context, IMapper mapper, IWebHostEnvironment appEnwironment, IRecaptchaService recaptcha, IConfiguration configuration)
         {
@@ -32,26 +30,18 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _appEnwironment = appEnwironment;
             _recaptcha = recaptcha;
-            Configuration = configuration;
-            SetMaxAnnouncementCount();           
+            Configuration = configuration;                 
         }
 
-        private void SetMaxAnnouncementCount()
-        {
-            try
-            {
-                MaxAnnouncementCount = int.Parse(Configuration["MaxAnnouncementCount"]);
+        private int SetMaxAnnouncementCount()
+        {           
+            int MaxAnnouncementCount = int.Parse(Configuration["MaxAnnouncementCount"]);
                 
-                if (MaxAnnouncementCount <1)
-                {
-                    //генерируем искючение "Недопустимое значение поля "MaxAnnouncementCount" в файле настроек! "    
-                }
-            }
-            catch (Exception e)
-            {
-               // доработать!!!
-               //внести вариант из условия if  и вариант когда парсинг не удался
-            }
+            if (MaxAnnouncementCount <1)
+              {
+                 throw new Exception("Недопустимое значение поля MaxAnnouncementCount в файле настроек! ");     
+              }
+            return MaxAnnouncementCount;
         }
         //GET api/announcements/1/5   
         [HttpGet("{page}/{pageSize}/{searchString}/{userId?}/{sortOrder?}")]
@@ -149,20 +139,19 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         {
             try
             {
-                //раскоментировать для проверки капчи, при наличии годного клиента
-                //var captchaResponse = await _recaptcha.Validate(Request.Form);
-                //if (!captchaResponse.Success)
-                //{
-                //    ModelState.AddModelError("reCaptchaError", "reCAPTCHA error occured. Please try again.");
-                //    return RedirectToAction(nameof(Index));
-                //}
+                var captchaResponse = await _recaptcha.Validate(Request.Form);
+                if (!captchaResponse.Success)
+                {
+                    ModelState.AddModelError("reCaptchaError", "reCAPTCHA error occured. Please try again.");
+                    return RedirectToAction(nameof(Index));
+                }
                 if (announcementDTO == null)
                 {
                     return BadRequest();
                 }
 
                 Announcement announcement = _mapper.Map<AnnouncementDTO, Announcement>(announcementDTO);
-
+                int MaxAnnouncementCount = SetMaxAnnouncementCount();
                 if (userId!=null)
                 {
 
