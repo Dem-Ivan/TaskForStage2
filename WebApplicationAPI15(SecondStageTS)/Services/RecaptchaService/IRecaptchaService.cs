@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using WebApplicationAPI15_SecondStageTS_.Models;
 
-namespace WebApplicationAPI15_SecondStageTS_.Services
+namespace WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService
 {
 	public interface IRecaptchaService
 	{

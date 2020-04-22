@@ -5,21 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using WebApplicationAPI15_SecondStageTS_.Models;
 using WebApplicationAPI15_SecondStageTS_.Options;
 
-namespace WebApplicationAPI15_SecondStageTS_.Services
+namespace WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService
 {
 	public class GoogleRecaptchaService : IRecaptchaService
 	{
-		private readonly ReCaptchaOptions _options;
+		private readonly IOptions<ReCaptchaOptions> _reCaptchaOptions;
 		private readonly HttpClient _httpClient;
 
-		public GoogleRecaptchaService(IOptions<AppOptions> optionsAccessor )
+		public GoogleRecaptchaService(IOptions<ReCaptchaOptions> reCaptchaOptions, HttpClient httpClient)
 		{
-			_httpClient = new HttpClient();
-			_httpClient.BaseAddress = new Uri("http://www.google.com");
-			_options = optionsAccessor.Value.ReCaptcha;
+			_httpClient = httpClient;
+			_httpClient.BaseAddress = new Uri("http://www.google.com");			
+			_reCaptchaOptions = reCaptchaOptions;
 		}
 
 		public async Task<RecaptchaResponse> Validate(IFormCollection form)
@@ -27,7 +26,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Services
 			var gRecaptchaResponse = form["g-recaptcha-response"];
 			var content = new FormUrlEncodedContent(new[]
 			{ 
-				new KeyValuePair<string, string>("secret", _options.SecretKey),
+				new KeyValuePair<string, string>("secret",_reCaptchaOptions.Value.SecretKey),
 				new KeyValuePair<string, string>("response", gRecaptchaResponse)
 			});
 

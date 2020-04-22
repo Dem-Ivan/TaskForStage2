@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using WebApplicationAPI15_SecondStageTS_.Context;
 using WebApplicationAPI15_SecondStageTS_.Models;
 
 namespace WebApplicationAPI15_SecondStageTS_.Migrations

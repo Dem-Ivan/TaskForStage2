@@ -13,8 +13,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Helpers
 			CreateMap<Announcement, IEnumerable<AnnouncementDTO>>();
 			CreateMap<User, UserDTO>();
 			CreateMap<UserDTO, User>();
-			CreateMap<Announcement,AnnouncementDTO>().ForMember(x => x.user, o => o.MapFrom(s => s.user));
-			CreateMap<AnnouncementDTO, Announcement>().ForMember(s => s.user, o => o.MapFrom(x => x.user));
+			CreateMap<Announcement,AnnouncementDTO>().ForMember(x => x.userDTO, o => o.MapFrom(s => s.user));
+			CreateMap<AnnouncementDTO, Announcement>().ForMember(s => s.user, o => o.MapFrom(x => x.userDTO));
 		}
 	}
 }

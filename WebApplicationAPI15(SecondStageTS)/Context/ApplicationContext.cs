@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WebApplicationAPI15_SecondStageTS_.Models;
 
-namespace WebApplicationAPI15_SecondStageTS_.Models
+namespace WebApplicationAPI15_SecondStageTS_.Context
 {
 	public class ApplicationContext : DbContext
 	{

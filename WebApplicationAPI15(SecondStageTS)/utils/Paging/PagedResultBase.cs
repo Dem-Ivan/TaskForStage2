@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Linq;
 
-namespace WebApplicationAPI15_SecondStageTS_.Services
+namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
 {
 	public abstract class PagedResultBase
 	{
@@ -21,9 +20,5 @@ namespace WebApplicationAPI15_SecondStageTS_.Services
 		}
 	}
 
-	public class PagedResult<T> : PagedResultBase where T : class
-	{
-		public IQueryable<T> Results { get; set; }	
-		
-	}
+	
 }

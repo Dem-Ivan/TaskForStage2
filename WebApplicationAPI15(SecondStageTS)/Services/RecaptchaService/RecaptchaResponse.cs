@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace WebApplicationAPI15_SecondStageTS_.Models
+namespace WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService
 {
 	public class RecaptchaResponse
 	{

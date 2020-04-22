@@ -11,6 +11,6 @@ namespace WebApplicationAPI15_SecondStageTS_.Models
 
 		[Required(ErrorMessage = "Укажите имя пользователя")]
 		public string Name { get; set; }
-		public List<Announcement> Announcements { get; set; } //= new List<Announcement>();
+		public List<Announcement> Announcements { get; set; } 
 	}
 }

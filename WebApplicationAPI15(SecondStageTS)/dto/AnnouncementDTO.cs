@@ -11,6 +11,6 @@ namespace WebApplicationAPI15_SecondStageTS_.dto
 		public string Image { get; set; }
 		public int Rating { get; set; }
 		public DateTime CreationDate { get; set; }
-		public UserDTO user { get; set; }
+		public UserDTO userDTO { get; set; }
 	}
 }

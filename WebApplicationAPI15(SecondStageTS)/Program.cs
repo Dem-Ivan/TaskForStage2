@@ -3,7 +3,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using WebApplicationAPI15_SecondStageTS_.Models;
+using WebApplicationAPI15_SecondStageTS_.Context;
 using WebApplicationAPI15_SecondStageTS_.Services;
 
 namespace WebApplicationAPI15_SecondStageTS_

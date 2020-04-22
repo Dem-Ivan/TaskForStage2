@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using WebApplicationAPI15_SecondStageTS_.Models;
 using AutoMapper;
 using WebApplicationAPI15_SecondStageTS_.Options;
-using WebApplicationAPI15_SecondStageTS_.Services;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using WebApplicationAPI15_SecondStageTS_.Context;
+using WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService;
 
 namespace WebApplicationAPI15_SecondStageTS_
 {
@@ -27,8 +29,9 @@ namespace WebApplicationAPI15_SecondStageTS_
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 			services.AddSwaggerGen(c => c.SwaggerDoc("v1",new OpenApiInfo { Title = "My API", Version = "v1"}));
 
-			services.Configure<AppOptions>(Configuration);
-			services.AddSingleton<IRecaptchaService, GoogleRecaptchaService>();
+			services.Configure<ReCaptchaOptions>(Configuration.GetSection("ReCaptcha"));
+			services.Configure<AnnCountOptions>(Configuration);			
+			services.AddHttpClient<IRecaptchaService, GoogleRecaptchaService>();
 		}
 		public void Configure(IApplicationBuilder app)
 		{
@@ -41,8 +44,23 @@ namespace WebApplicationAPI15_SecondStageTS_
 			});
 
 			app.UseDefaultFiles();
+
 			app.UseStaticFiles();
-			
+
+			app.UseStaticFiles(new StaticFileOptions()
+			{
+				FileProvider = new PhysicalFileProvider(
+					Path.Combine(Directory.GetCurrentDirectory(), @Configuration["BigImagesDirectory"])),
+				RequestPath = new Microsoft.AspNetCore.Http.PathString("/BigImages")
+			});
+
+			app.UseStaticFiles(new StaticFileOptions()
+			{
+				FileProvider = new PhysicalFileProvider(
+					Path.Combine(Directory.GetCurrentDirectory(), @Configuration["SmallImagesDirectory"])),
+				RequestPath = new Microsoft.AspNetCore.Http.PathString("/SmallImages")
+			});
+
 			app.UseRouting();
 			app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 		}

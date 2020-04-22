@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace WebApplicationAPI15_SecondStageTS_.Services
+namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
 {
 	public static class QueryableExtension
 	{       
