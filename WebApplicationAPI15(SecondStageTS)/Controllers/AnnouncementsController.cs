@@ -197,14 +197,15 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 {
                     return BadRequest();
                 }
-                
-                Announcement announcement = await _context.Announcements.SingleOrDefaultAsync(an => an.Id == announcementDTO.Id);
-                
+
+               // Announcement announcement = _mapper.Map<AnnouncementDTO, Announcement>(announcementDTO);
+                Announcement announcement = await _context.Announcements.Include(u =>u.user).SingleOrDefaultAsync(an => an.Id == announcementDTO.Id);
+
                 if (announcement == null)//приверить в работе
                 {
                     return NotFound();
                 }
-                
+
                 announcement.OrderNumber = announcementDTO.OrderNumber;
                 announcement.Text = announcementDTO.Text;
                 announcement.Rating = announcementDTO.Rating;
