@@ -9,12 +9,15 @@ namespace WebApplicationAPI15_SecondStageTS_.Helpers
 	{
 		public AutoMapperProfile()
 		{
+
 			CreateMap<Announcement, AnnouncementDTO>();
 			CreateMap<Announcement, IEnumerable<AnnouncementDTO>>();
 			CreateMap<User, UserDTO>();
 			CreateMap<UserDTO, User>();
 			CreateMap<Announcement,AnnouncementDTO>().ForMember(x => x.userDTO, o => o.MapFrom(s => s.user));
 			CreateMap<AnnouncementDTO, Announcement>().ForMember(s => s.user, o => o.MapFrom(x => x.userDTO));
+			
+						
 		}
 	}
 }

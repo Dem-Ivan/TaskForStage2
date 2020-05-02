@@ -72,10 +72,14 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         [HttpPost]
         public async Task<ActionResult<Guid>> PostUser(User user)
         {
-            _context.Users.Add(user);
+            if (user == null)
+            {
+                return BadRequest();
+            }
+            await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            return Ok(user.Id);
+            return StatusCode(201, user.Id); 
         }
 
         [HttpPut("{id}")]
@@ -104,7 +108,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<User>> DeleteUser(Guid id)
+        public async Task<ActionResult> DeleteUser(Guid id)
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
             if (user == null)
@@ -115,7 +119,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            return Ok();
+            return StatusCode(204);
         }
 
        

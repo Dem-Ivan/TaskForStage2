@@ -19,7 +19,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Models
 		[Required(ErrorMessage = "Не указано значение поля - Text ")]
 		[StringLength(100, MinimumLength = 5, ErrorMessage = "Длина строки должна быть от 5 до 100 символов")]
 		public string Text { get; set; }
-		
+
+		[AutoMapper.IgnoreMap()]
 		[Required(ErrorMessage = "Не указано значение поля - Image" )]
 		public string Image { get; set; }
 

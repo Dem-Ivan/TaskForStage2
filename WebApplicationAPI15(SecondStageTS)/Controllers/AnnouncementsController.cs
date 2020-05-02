@@ -13,6 +13,7 @@ using WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService;
 using WebApplicationAPI15_SecondStageTS_.utils.Paging;
 using WebApplicationAPI15_SecondStageTS_.utils.Sort;
 
+
 namespace WebApplicationAPI15_SecondStageTS_.Controllers
 {
     [Route("api/[controller]")]
@@ -50,12 +51,12 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             try
             {
                 PagedResult<Announcement> query;
-                IQueryable<Announcement> announcements = _context.Announcements;
+                IQueryable<Announcement> announcements = _context.Announcements;               
                 if (!string.IsNullOrEmpty(searchString))
-                {                   
-                    announcements = _context.Announcements.Where(s => (s.Text.Contains(searchString)) || (s.user.Name.Contains(searchString))
-                    || (EF.Functions.Like(s.OrderNumber.ToString(), searchString)) || (EF.Functions.Like(s.Rating.ToString(), searchString))
-                    || (EF.Functions.Like(s.CreationDate.ToString(), searchString)));
+                {                                                   
+                    announcements = _context.Announcements.Where(s => (EF.Functions.Like(s.Text.ToUpper(), $"%{searchString.ToUpper()}%")) ||
+                    (EF.Functions.Like(s.user.Name.ToUpper(), $"%{searchString.ToUpper()}%")) || (EF.Functions.Like(s.OrderNumber.ToString(), searchString)) ||
+                    (EF.Functions.Like(s.Rating.ToString(), searchString)) || (EF.Functions.Like(s.CreationDate.ToString(), searchString)));
                 }
 
                 if (userId != null)//если передан userId - проводим фильтрацию по userId
@@ -103,7 +104,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                
        
         //GET api/announcements/5     
-        [HttpGet("{id}")]
+        [HttpGet("{ id}")]
         public async Task<ActionResult<AnnouncementDTO>> GetAnnouncement(Guid id)
         {            
             try
@@ -125,7 +126,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         }
 
         //POST api/announcements
-        [HttpPost()]
+        [HttpPost()]       
         public async Task<ActionResult<Guid>> PostAnnouncement(AnnouncementDTO announcementDTO, [FromQuery]Guid? userId)
         {
             try
@@ -142,23 +143,23 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 }
 
                 Announcement announcement = _mapper.Map<AnnouncementDTO, Announcement>(announcementDTO);
-                announcement = SetAnnouncementFilds(announcement, userId);
+                announcement = await SetAnnouncementFilds(announcement, userId);
                 _context.Announcements.Add(announcement);
-                await _context.SaveChangesAsync();             
-
-                return Ok(announcement.Id);
+                await _context.SaveChangesAsync();
+               
+                return StatusCode(201, announcement.Id);
             }
             catch (Exception e)
             {
                 return BadRequest(new { e.Message, e.StackTrace });
             }
         }
-        private Announcement SetAnnouncementFilds(Announcement announcement, Guid? userId)
+        private async Task<Announcement> SetAnnouncementFilds(Announcement announcement, Guid? userId)
         {
             int MaxAnnouncementCount = SetMaxAnnouncementCount();
             if (userId != null)
             {
-                User user = _context.Users.Include(an => an.Announcements).SingleOrDefault(u => u.Id == userId);
+                User user = await _context.Users.Include(an => an.Announcements).SingleOrDefaultAsync(u => u.Id == userId);
 
                 if (user != null)
                 {
@@ -196,12 +197,11 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 if (announcementDTO == null)
                 {
                     return BadRequest();
-                }
-
-               // Announcement announcement = _mapper.Map<AnnouncementDTO, Announcement>(announcementDTO);
+                }                
+             
                 Announcement announcement = await _context.Announcements.Include(u =>u.user).SingleOrDefaultAsync(an => an.Id == announcementDTO.Id);
 
-                if (announcement == null)//приверить в работе
+                if (announcement == null)
                 {
                     return NotFound();
                 }
@@ -222,10 +222,10 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 return BadRequest(new { e.Message, e.StackTrace });
             }
         }
-
+       
         //DELETE api/announcements/5
         [HttpDelete()]
-        public async Task<ActionResult<AnnouncementDTO>> DeleteAnnouncement([FromQuery]Guid id)
+        public async Task<ActionResult> DeleteAnnouncement([FromQuery]Guid id)
         {
             try
             {
@@ -238,7 +238,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
                 _context.Announcements.Remove(announcement);
                 await _context.SaveChangesAsync();
-                return Ok();
+                
+                return StatusCode(204);
             }
             catch (Exception e)
             {
