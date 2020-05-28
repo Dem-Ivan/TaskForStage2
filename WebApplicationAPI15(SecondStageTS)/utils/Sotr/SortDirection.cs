@@ -1,10 +1,9 @@
 ﻿
 namespace WebApplicationAPI15_SecondStageTS_.utils.Sort
 {
-	public enum SortName
+	public enum SortDirection
 	{
-		OrderNumber,
-		Rating,
-		CreationDate		
+		Asc,
+		Desc
 	}
 }

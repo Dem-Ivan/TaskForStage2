@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApplicationAPI15_SecondStageTS_.Context;
@@ -10,6 +11,7 @@ using WebApplicationAPI15_SecondStageTS_.dto;
 using WebApplicationAPI15_SecondStageTS_.Models;
 using WebApplicationAPI15_SecondStageTS_.Options;
 using WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService;
+using WebApplicationAPI15_SecondStageTS_.utils;
 using WebApplicationAPI15_SecondStageTS_.utils.Paging;
 using WebApplicationAPI15_SecondStageTS_.utils.Sort;
 
@@ -33,7 +35,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             _annCountOptions = annCountOptions ?? throw new ArgumentNullException(nameof(annCountOptions));
         }
 
-        private int SetMaxAnnouncementCount()
+        private int GetMaxAnnouncementCount()
         {            
             int MaxAnnouncementCount = _annCountOptions.Value.MaxAnnouncementCount;
             if (MaxAnnouncementCount <1)
@@ -45,29 +47,37 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
        
         //GET api/announcements/1/5   
         [HttpGet("{page}/{pageSize}")]
-        public async Task<ActionResult<GetResult<AnnouncementDTO>>> GetAnnouncements(int page, int pageSize, [FromQuery]string? searchString, 
-            [FromQuery]Guid? userId, [FromQuery]SortName? sortName = SortName.CreationDate, [FromQuery] SortMode? sortMode = SortMode.Asc)
+        public async Task<ActionResult<GetResult<AnnouncementDTOtoFront>>> GetAnnouncements([FromQuery] QueryData  queryData, int page = 1, int pageSize = 25)
         {
             try
             {
-                PagedResult<Announcement> query;
-                IQueryable<Announcement> announcements = _context.Announcements;               
-                if (!string.IsNullOrEmpty(searchString))
-                {                                                   
-                    announcements = _context.Announcements.Where(s => (EF.Functions.Like(s.Text.ToUpper(), $"%{searchString.ToUpper()}%")) ||
-                    (EF.Functions.Like(s.user.Name.ToUpper(), $"%{searchString.ToUpper()}%")) || (EF.Functions.Like(s.OrderNumber.ToString(), searchString)) ||
-                    (EF.Functions.Like(s.Rating.ToString(), searchString)) || (EF.Functions.Like(s.CreationDate.ToString(), searchString)));
+                IQueryable<Announcement> announcements = _context.Announcements.Where(an => an.IsDeleted == false);               
+                if (!string.IsNullOrEmpty(queryData.searchString))
+                {
+                    queryData.searchString = queryData.searchString.ToUpper();
+                    announcements = _context.Announcements.Where(s => (EF.Functions.Like(s.Text.ToUpper(), $"%{queryData.searchString}%")) ||
+                    (EF.Functions.Like(s.user.Name.ToUpper(), $"%{queryData.searchString}%")) || (EF.Functions.Like(s.OrderNumber.ToString(), $"%{queryData.searchString}%")) ||
+                    (EF.Functions.Like(s.Rating.ToString(), $"%{queryData.searchString}%")) || (EF.Functions.Like(s.CreationDate.ToString(), $"%{queryData.searchString}%")) ||
+                    (EF.Functions.Like(s.Image.ToUpper(), $"%{queryData.searchString}%")));
                 }
 
-                if (userId != null)//если передан userId - проводим фильтрацию по userId
+                if (queryData.FilterByUserId != null)//если передан userId - проводим фильтрацию по userId
                 {
-                    announcements = announcements.Where(w => w.UserId == userId);                    
-                }
-               
-                query = SortAndPaging(announcements, sortName, sortMode, page, pageSize);
-                GetResult<AnnouncementDTO> result = new GetResult<AnnouncementDTO>();
-                result.CountRowsFound = query.RowCount;
-                result.Rows = await _mapper.ProjectTo<AnnouncementDTO>(query.Results).ToListAsync();
+                    announcements = announcements.Where(w => w.UserId == queryData.FilterByUserId && w.user.IsDeleted == false);                    
+                }             
+                        
+                announcements = queryData.sortName switch
+                {
+                    "OrderNumber" => announcements.GetSortBy(x => x.OrderNumber, queryData.sortDirection),
+                    "Rating" => announcements.GetSortBy(x => x.Rating, queryData.sortDirection),
+                    _ => announcements.GetSortBy(x => x.CreationDate, queryData.sortDirection)
+                };
+
+                var pagedResult = announcements.GetPaged(page, pageSize);
+
+                GetResult<AnnouncementDTOtoFront> result = new GetResult<AnnouncementDTOtoFront>();
+                result.Rows = pagedResult.Result.MappyngTo<AnnouncementDTOtoFront>(_mapper);
+                result.CountRowsFound = pagedResult.RowCount;
 
                 return Ok(result);
             }
@@ -75,42 +85,17 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             {
                 return BadRequest(new { e.Message, e.StackTrace });
             }
-        }
-
-        private PagedResult<Announcement> SortAndPaging(IQueryable<Announcement> announcements, 
-            SortName? sortName, SortMode? sortMode, int page, int pageSize) 
-        {    
-            if (sortMode == SortMode.Desc)
-            {
-                announcements = sortName switch
-                {                    
-                    SortName.OrderNumber => announcements.OrderByDescending(o => o.OrderNumber),
-                    SortName.Rating => announcements.OrderByDescending(o => o.Rating),
-                    _=> announcements.OrderByDescending(o => o.CreationDate)
-                };
-            }
-            else
-            {
-                announcements = sortName switch
-                {                    
-                    SortName.OrderNumber => announcements.OrderBy(o => o.OrderNumber),
-                    SortName.Rating => announcements.OrderBy(o => o.Rating),
-                    _ => announcements.OrderBy(o => o.CreationDate)
-                };
-            }
-
-            return(announcements.GetPaged(page, pageSize));
-        }
+        }    
                
        
         //GET api/announcements/5     
-        [HttpGet("{ id}")]
-        public async Task<ActionResult<AnnouncementDTO>> GetAnnouncement(Guid id)
+        [HttpGet]//("{ id}")
+        public async Task<ActionResult<AnnouncementDTOtoFront>> GetAnnouncement(Guid id)
         {            
             try
             {
-                var query = _context.Announcements.Where(an => an.Id == id);
-                var announcementDTO = await _mapper.ProjectTo<AnnouncementDTO>(query).SingleOrDefaultAsync();
+                var query = _context.Announcements.Where(an => an.Id == id && an.IsDeleted == false);
+                var announcementDTO = await _mapper.ProjectTo<AnnouncementDTOtoFront>(query).SingleOrDefaultAsync();
 
                 if (announcementDTO == null)
                 {
@@ -127,8 +112,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
         //POST api/announcements
         [HttpPost()]       
-        public async Task<ActionResult<Guid>> PostAnnouncement(AnnouncementDTO announcementDTO, [FromQuery]Guid? userId)
-        {
+        public async Task<ActionResult<Guid>> PostAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid userId)
+        {           
             try
             {
                 var captchaResponse = await _recaptcha.Validate(Request.Form);
@@ -137,13 +122,25 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                     ModelState.AddModelError("reCaptchaError", "reCAPTCHA error occured. Please try again.");
                     return RedirectToAction(nameof(Index));
                 }
-                if (announcementDTO == null)
-                {
-                    return BadRequest();
-                }
+                if (!ModelState.IsValid) return BadRequest();
 
-                Announcement announcement = _mapper.Map<AnnouncementDTO, Announcement>(announcementDTO);
-                announcement = await SetAnnouncementFilds(announcement, userId);
+                var user = await _context.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+
+                if (user == null || user.IsDeleted == true) return NotFound("User not found");
+
+                if (user.AnnouncementsCount>= GetMaxAnnouncementCount())
+                {
+                    throw new Exception($"Превышено максимальное колличество объяалений!");
+                }
+                var announcement = _mapper.Map<Announcement>(announcementDTO);
+                announcement.user = user;                
+
+                if (!_context.Announcements.Any())
+                    announcement.OrderNumber = 1;
+                else
+                    announcement.OrderNumber = _context.Announcements.Max(e => e.OrderNumber) + 1;
+               
+                user.AnnouncementsCount++;
                 _context.Announcements.Add(announcement);
                 await _context.SaveChangesAsync();
                
@@ -154,67 +151,23 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 return BadRequest(new { e.Message, e.StackTrace });
             }
         }
-        private async Task<Announcement> SetAnnouncementFilds(Announcement announcement, Guid? userId)
-        {
-            int MaxAnnouncementCount = SetMaxAnnouncementCount();
-            if (userId != null)
-            {
-                User user = await _context.Users.Include(an => an.Announcements).SingleOrDefaultAsync(u => u.Id == userId);
-
-                if (user != null)
-                {
-                    announcement.user = user;
-                    if (user.Announcements.Count >= MaxAnnouncementCount)
-                    {
-                        throw new Exception($"Один пользователь может публиковаит не более {MaxAnnouncementCount} объяалений!");                        
-                    }
-                }
-                else
-                {
-                    throw new Exception($"Пользователя с таким Id {userId} не существует!");                  
-                }
-            }
-
-            if (!_context.Announcements.Any())
-            {
-                announcement.OrderNumber = 1;
-            }
-            else
-            {
-                announcement.OrderNumber = _context.Announcements.Max(e => e.OrderNumber) + 1;
-            }
-            announcement.UserId = announcement.user.Id;
-            announcement.CreationDate = DateTime.Now;
-
-            return announcement;
-        }
+       
         //PUT api/announcements
-        [HttpPut()]
-        public async Task<ActionResult<Guid>> PutAnnouncement(AnnouncementDTO announcementDTO)
+        [HttpPut]
+        public async Task<ActionResult<Guid>> PutAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid announcementId)
         {
             try
             {
-                if (announcementDTO == null)
-                {
-                    return BadRequest();
-                }                
-             
-                Announcement announcement = await _context.Announcements.Include(u =>u.user).SingleOrDefaultAsync(an => an.Id == announcementDTO.Id);
+                if (announcementDTO == null) return BadRequest();              
+               
+                Announcement announcement = await _context.Announcements.Include(u => u.user).SingleOrDefaultAsync(an => an.Id == announcementId);
 
-                if (announcement == null)
-                {
-                    return NotFound();
-                }
-
-                announcement.OrderNumber = announcementDTO.OrderNumber;
-                announcement.Text = announcementDTO.Text;
-                announcement.Rating = announcementDTO.Rating;
-                announcement.Image = announcementDTO.Image;
-                announcement.user.Name = announcementDTO.userDTO.Name;
-
+                if (announcement == null || announcement.IsDeleted == true) return NotFound();
+              
+                _mapper.Map(announcementDTO, announcement);
                 _context.Update(announcement);
                 await _context.SaveChangesAsync();
-                           
+
                 return Ok(announcement.Id);
             }
             catch (Exception e)
@@ -222,7 +175,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 return BadRequest(new { e.Message, e.StackTrace });
             }
         }
-       
+
         //DELETE api/announcements/5
         [HttpDelete()]
         public async Task<ActionResult> DeleteAnnouncement([FromQuery]Guid id)
@@ -231,12 +184,10 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             {
                 Announcement announcement = await _context.Announcements.SingleOrDefaultAsync(an => an.Id == id);
 
-                if (announcement == null)
-                {
-                    return NotFound();
-                }
-
-                _context.Announcements.Remove(announcement);
+                if (announcement == null || announcement.IsDeleted == true) return NotFound();
+               
+                announcement.IsDeleted = true;
+                announcement.user.AnnouncementsCount--;
                 await _context.SaveChangesAsync();
                 
                 return StatusCode(204);

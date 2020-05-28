@@ -11,6 +11,10 @@ namespace WebApplicationAPI15_SecondStageTS_.Models
 
 		[Required(ErrorMessage = "Укажите имя пользователя")]
 		public string Name { get; set; }
-		public List<Announcement> Announcements { get; set; } 
+		public bool IsDeleted { get; set; } = false;
+		public List<Announcement> Announcements { get;} 		
+		[ConcurrencyCheck]
+		public int AnnouncementsCount { get; set; }
+
 	}
 }

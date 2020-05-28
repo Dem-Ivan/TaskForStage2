@@ -1,10 +1,10 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApplicationAPI15_SecondStageTS_.dto
 {
 	public class UserDTO
 	{
-		public Guid Id { get; set; }
-		public string Name { get; set; }
+		[Required] public string Name { get; set; }
 	}
 }

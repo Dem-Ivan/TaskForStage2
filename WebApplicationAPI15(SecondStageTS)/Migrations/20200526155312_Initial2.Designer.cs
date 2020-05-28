@@ -6,13 +6,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApplicationAPI15_SecondStageTS_.Context;
-using WebApplicationAPI15_SecondStageTS_.Models;
 
 namespace WebApplicationAPI15_SecondStageTS_.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200412114348_myMigration5")]
-    partial class myMigration5
+    [Migration("20200526155312_Initial2")]
+    partial class Initial2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,6 +33,9 @@ namespace WebApplicationAPI15_SecondStageTS_.Migrations
                     b.Property<string>("Image")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("OrderNumber")
                         .HasColumnType("integer");
@@ -61,6 +63,13 @@ namespace WebApplicationAPI15_SecondStageTS_.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<int>("AnnouncementsCount")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()

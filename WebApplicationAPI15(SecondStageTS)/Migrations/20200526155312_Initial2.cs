@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WebApplicationAPI15_SecondStageTS_.Migrations
 {
-    public partial class myMigration5 : Migration
+    public partial class Initial2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,7 +12,9 @@ namespace WebApplicationAPI15_SecondStageTS_.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    IsDeleted = table.Column<bool>(nullable: true),
+                    AnnouncementsCount = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,7 +31,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Migrations
                     Text = table.Column<string>(maxLength: 100, nullable: false),
                     Image = table.Column<string>(nullable: false),
                     Rating = table.Column<int>(nullable: false),
-                    CreationDate = table.Column<DateTime>(nullable: false)
+                    CreationDate = table.Column<DateTime>(nullable: false),
+                    IsDeleted = table.Column<bool>(nullable: true)
                 },
                 constraints: table =>
                 {

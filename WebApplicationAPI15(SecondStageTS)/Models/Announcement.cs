@@ -9,7 +9,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Models
 		public Guid Id { get; set; } = Guid.NewGuid();
 
 		[Required( ErrorMessage = "Не указано значение поля - OrderNumber ")]
-		public int OrderNumber { get; set; }
+		public int OrderNumber { get; set; } 
 		
 		public Guid UserId { get; set; }
 
@@ -20,7 +20,6 @@ namespace WebApplicationAPI15_SecondStageTS_.Models
 		[StringLength(100, MinimumLength = 5, ErrorMessage = "Длина строки должна быть от 5 до 100 символов")]
 		public string Text { get; set; }
 
-		[AutoMapper.IgnoreMap()]
 		[Required(ErrorMessage = "Не указано значение поля - Image" )]
 		public string Image { get; set; }
 
@@ -28,6 +27,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Models
 		public int Rating { get; set; }
 
 		[Required(ErrorMessage = "Не указано значение поля - CreationDate ")]
-		public DateTime CreationDate { get; set; }
+		public DateTime CreationDate { get; set; } = DateTime.Now;
+		public bool IsDeleted { get; set; } = false;
 	}
 }
