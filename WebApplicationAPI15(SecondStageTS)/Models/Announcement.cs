@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplicationAPI15_SecondStageTS_.Models
 {
@@ -8,6 +9,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Models
 		
 		public Guid Id { get; set; } = Guid.NewGuid();
 
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		[Required( ErrorMessage = "Не указано значение поля - OrderNumber ")]
 		public int OrderNumber { get; set; } 
 		

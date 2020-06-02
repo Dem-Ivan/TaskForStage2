@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using WebApplicationAPI15_SecondStageTS_.Context;
 using WebApplicationAPI15_SecondStageTS_.dto;
 using WebApplicationAPI15_SecondStageTS_.Models;
-using WebApplicationAPI15_SecondStageTS_.Services;
 using WebApplicationAPI15_SecondStageTS_.utils;
 using WebApplicationAPI15_SecondStageTS_.utils.Paging;
 
@@ -109,11 +108,15 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUser(Guid id)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.Include(an=>an.Announcements).SingleOrDefaultAsync(u => u.Id == id);
             if (user == null || user.IsDeleted == true) return NotFound();
                      
             user.IsDeleted = true;
-            
+            foreach (var announcement in user.Announcements)
+            {
+                announcement.IsDeleted = true;
+            }
+
             await _context.SaveChangesAsync();
 
             return StatusCode(204);

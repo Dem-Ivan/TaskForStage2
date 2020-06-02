@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using WebApplicationAPI15_SecondStageTS_.Context;
 using WebApplicationAPI15_SecondStageTS_.dto;
 using WebApplicationAPI15_SecondStageTS_.Models;
@@ -13,7 +13,6 @@ using WebApplicationAPI15_SecondStageTS_.Options;
 using WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService;
 using WebApplicationAPI15_SecondStageTS_.utils;
 using WebApplicationAPI15_SecondStageTS_.utils.Paging;
-using WebApplicationAPI15_SecondStageTS_.utils.Sort;
 
 
 namespace WebApplicationAPI15_SecondStageTS_.Controllers
@@ -113,43 +112,44 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         //POST api/announcements
         [HttpPost()]       
         public async Task<ActionResult<Guid>> PostAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid userId)
-        {           
-            try
+        {
+            using (var transaction = new CommittableTransaction(new TransactionOptions { IsolationLevel = IsolationLevel.RepeatableRead }))
             {
-                var captchaResponse = await _recaptcha.Validate(Request.Form);
-                if (!captchaResponse.Success)
+                try
                 {
-                    ModelState.AddModelError("reCaptchaError", "reCAPTCHA error occured. Please try again.");
-                    return RedirectToAction(nameof(Index));
+                    var captchaResponse = await _recaptcha.Validate(Request.Form);
+                    if (!captchaResponse.Success)
+                    {
+                        ModelState.AddModelError("reCaptchaError", "reCAPTCHA error occured. Please try again.");
+                        return RedirectToAction(nameof(Index));
+                    }
+                    if (!ModelState.IsValid) return BadRequest();
+
+                    var user = await _context.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+
+                    if (user == null || user.IsDeleted == true) return NotFound("User not found");
+
+                    if (user.AnnouncementsCount >= GetMaxAnnouncementCount())
+                    {
+                        throw new Exception($"Превышено максимальное колличество объяалений!");
+                    }
+                    var announcement = _mapper.Map<Announcement>(announcementDTO);
+                    announcement.user = user;               
+                    user.AnnouncementsCount++;
+
+                    _context.Announcements.Add(announcement);
+                    await _context.SaveChangesAsync();
+
+                    transaction.Commit();
+                    return StatusCode(201, announcement.Id);
                 }
-                if (!ModelState.IsValid) return BadRequest();
-
-                var user = await _context.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
-
-                if (user == null || user.IsDeleted == true) return NotFound("User not found");
-
-                if (user.AnnouncementsCount>= GetMaxAnnouncementCount())
+                catch (Exception e)
                 {
-                    throw new Exception($"Превышено максимальное колличество объяалений!");
+                    transaction.Rollback();
+                    return BadRequest(new { e.Message, e.StackTrace });
                 }
-                var announcement = _mapper.Map<Announcement>(announcementDTO);
-                announcement.user = user;                
-
-                if (!_context.Announcements.Any())
-                    announcement.OrderNumber = 1;
-                else
-                    announcement.OrderNumber = _context.Announcements.Max(e => e.OrderNumber) + 1;
-               
-                user.AnnouncementsCount++;
-                _context.Announcements.Add(announcement);
-                await _context.SaveChangesAsync();
-               
-                return StatusCode(201, announcement.Id);
             }
-            catch (Exception e)
-            {
-                return BadRequest(new { e.Message, e.StackTrace });
-            }
+            
         }
        
         //PUT api/announcements

@@ -18,54 +18,39 @@ namespace WebApplicationAPI15_SecondStageTS_.Services
 
 				context.Announcements.AddRange(
 					new Announcement
-					{
-						OrderNumber = 1,
-						user = jon,						 
-						//UserId = jon.Id,
+					{						
+						user = jon,	
 						Text = "Продам Трактор",
 						Image = "1.png",
-						Rating = 1,
-						CreationDate = DateTime.Now
+						Rating = 1						
 					},
 					new Announcement
-					{
-						OrderNumber = 2,
-						user = jon,
-						//UserId = jon.Id,
+					{						
+						user = jon,						
 						Text = "Продам велосипед",
 						Image = "2.png",
-						Rating = 2,
-						CreationDate = DateTime.Now
+						Rating = 2						
 					},
 					new Announcement
 					{
-						OrderNumber = 3,
-						user = jon,
-						UserId = jon.Id,
+						user = jon,						
 						Text = "Продам квартиру",
 						Image = "3.png",
-						Rating = 3,
-						CreationDate = DateTime.Now
+						Rating = 3						
 					},
 					new Announcement
-					{
-						OrderNumber = 4,
-						user = sem,
-						//UserId = sem.Id,
+					{						
+						user = sem,						
 						Text = "Куплю трактор",
 						Image = "2.png",
-						Rating = 4,
-						CreationDate = DateTime.Now
+						Rating = 4						
 					},
 					new Announcement
-					{
-						OrderNumber = 5,
-						user = allis,
-						//UserId =allis.Id,
+					{						
+						user = allis,						
 						Text = "Учу английскому",
 						Image = "1.png",
-						Rating = 5,
-						CreationDate = DateTime.Now
+						Rating = 5						
 					});
 				context.SaveChanges();
 			}
