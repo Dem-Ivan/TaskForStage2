@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+
 using WebApplicationAPI15_SecondStageTS_.Context;
 using WebApplicationAPI15_SecondStageTS_.dto;
 using WebApplicationAPI15_SecondStageTS_.Models;
@@ -75,7 +76,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 var pagedResult = announcements.GetPaged(page, pageSize);
 
                 GetResult<AnnouncementDTOtoFront> result = new GetResult<AnnouncementDTOtoFront>();
-                result.Rows = pagedResult.Result.MappyngTo<AnnouncementDTOtoFront>(_mapper);
+                result.Rows = await pagedResult.Result.MappingTo<AnnouncementDTOtoFront>(_mapper);
                 result.CountRowsFound = pagedResult.RowCount;
 
                 return Ok(result);
@@ -113,7 +114,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         [HttpPost()]       
         public async Task<ActionResult<Guid>> PostAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid userId)
         {
-            using (var transaction = new CommittableTransaction(new TransactionOptions { IsolationLevel = IsolationLevel.RepeatableRead }))
+            
+            using (var transaction = _context.Database.BeginTransaction( System.Data.IsolationLevel.Serializable))
             {
                 try
                 {

@@ -36,7 +36,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 var pagedResult = users.GetPaged(page, pageSize);
                 
                 GetResult <UserDTO> result = new GetResult<UserDTO>();
-                result.Rows = pagedResult.Result.MappyngTo<UserDTO>(_mapper);
+                result.Rows = await pagedResult.Result.MappingTo<UserDTO>(_mapper);
                 result.CountRowsFound = pagedResult.RowCount;
 
                 return Ok(result);
