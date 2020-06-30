@@ -11,9 +11,9 @@ namespace WebApplicationAPI15_SecondStageTS_.Services
 		{
 			if (!context.Users.Any())
 			{
-				User jon = new User { Name = "Jon", AnnouncementsCount=3};
-				User sem = new User { Name = "Sem", AnnouncementsCount = 1 };
-				User allis = new User { Name = "Allis", AnnouncementsCount = 1};
+				User jon = new User { Name = "Jon"};
+				User sem = new User { Name = "Sem" };
+				User allis = new User { Name = "Allis"};
 				context.Users.AddRange(jon,sem,allis);
 
 				context.Announcements.AddRange(

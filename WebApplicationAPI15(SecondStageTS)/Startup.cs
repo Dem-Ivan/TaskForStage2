@@ -30,7 +30,7 @@ namespace WebApplicationAPI15_SecondStageTS_
 			services.AddSwaggerGen(c => c.SwaggerDoc("v1",new OpenApiInfo { Title = "My API", Version = "v1"}));
 
 			services.Configure<ReCaptchaOptions>(Configuration.GetSection("ReCaptcha"));
-			services.Configure<AnnCountOptions>(Configuration);			
+			services.Configure<UserOptions>(Configuration);			
 			services.AddHttpClient<IRecaptchaService, GoogleRecaptchaService>();
 		}
 		public void Configure(IApplicationBuilder app)

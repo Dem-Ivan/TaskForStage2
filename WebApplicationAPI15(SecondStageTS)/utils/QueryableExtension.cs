@@ -46,6 +46,10 @@ namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
         {
             if (mapper==null)
             {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+            if (objects == null)
+            {
                 throw new ArgumentNullException(nameof(objects));
             }
             return await mapper.ProjectTo<T>(objects).ToListAsync();

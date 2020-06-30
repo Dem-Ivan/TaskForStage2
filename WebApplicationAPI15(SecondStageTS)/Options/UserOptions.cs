@@ -2,7 +2,7 @@
 
 namespace WebApplicationAPI15_SecondStageTS_.Options
 {
-	public class AnnCountOptions
+	public class UserOptions
 	{
 		public int MaxAnnouncementCount { get; set; }
 	}

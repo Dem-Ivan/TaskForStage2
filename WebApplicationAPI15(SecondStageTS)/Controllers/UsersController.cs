@@ -16,12 +16,12 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext _context; 
         private readonly IMapper _mapper;
 
         public UsersController(ApplicationContext context, IMapper mapper)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -32,7 +32,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             try
             {
                 IQueryable<User> users = _context.Users;                
-                users = users.Where(u => u.IsDeleted == false).GetSortBy(u => u.Name, queryData.sortDirection);//при необходимости можно расширить на сортирову по дополнительным полям
+                users = users.Where(u => u.IsDeleted == false).GetSortBy(u => u.Name, queryData.sortDirection);
                 var pagedResult = users.GetPaged(page, pageSize);
                 
                 GetResult <UserDTO> result = new GetResult<UserDTO>();
@@ -62,7 +62,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                 }
 
                 return userDTO;
-            }
+            }         
             catch (Exception e)
             {
                 return BadRequest(new { e.Message, e.StackTrace });
@@ -71,7 +71,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
        
                
         [HttpPost]
-        public async Task<ActionResult<Guid>> PostUser([FromBody]UserDTO userDTO)
+        public async Task<ActionResult<Guid>> AddUser([FromBody]UserDTO userDTO)
         {
             if (!ModelState.IsValid) return BadRequest();
 
@@ -84,7 +84,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         }
 
         [HttpPut]//("{id}")
-        public async Task<IActionResult> PutUser([FromBody]UserDTO userDTO, [FromQuery] Guid userId)
+        public async Task<IActionResult> UpdateUser([FromBody]UserDTO userDTO, [FromQuery] Guid userId)
         {
             try
             {              
@@ -98,10 +98,11 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
                 return Ok(user.Id);
             }
-            catch (DbUpdateConcurrencyException e)
+            catch (Exception e)
             {
                 return BadRequest(new { e.Message, e.StackTrace });
             }
+           
         }
 
         // DELETE: api/Users/5

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
+
 
 using WebApplicationAPI15_SecondStageTS_.Context;
 using WebApplicationAPI15_SecondStageTS_.dto;
@@ -25,25 +25,16 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         private readonly ApplicationContext _context;
         private readonly IMapper _mapper;     
         private readonly IRecaptchaService _recaptcha;      
-        private readonly IOptions<AnnCountOptions> _annCountOptions;
+        private readonly IOptions<UserOptions> _userOptions;
        
-        public AnnouncementsController(ApplicationContext context, IMapper mapper, IRecaptchaService recaptcha, IOptions<AnnCountOptions> annCountOptions)
+        public AnnouncementsController(ApplicationContext context, IMapper mapper, IRecaptchaService recaptcha, IOptions<UserOptions> userOptions)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));           
             _recaptcha = recaptcha ?? throw new ArgumentNullException(nameof(recaptcha));          
-            _annCountOptions = annCountOptions ?? throw new ArgumentNullException(nameof(annCountOptions));
+            _userOptions = userOptions ?? throw new ArgumentNullException(nameof(userOptions));
         }
-
-        private int GetMaxAnnouncementCount()
-        {            
-            int MaxAnnouncementCount = _annCountOptions.Value.MaxAnnouncementCount;
-            if (MaxAnnouncementCount <1)
-              {
-                 throw new Exception("Недопустимое значение поля MaxAnnouncementCount в файле настроек! ");     
-              }
-            return MaxAnnouncementCount;
-        }
+               
        
         //GET api/announcements/1/5   
         [HttpGet("{page}/{pageSize}")]
@@ -112,7 +103,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
         //POST api/announcements
         [HttpPost()]       
-        public async Task<ActionResult<Guid>> PostAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid userId)
+        public async Task<ActionResult<Guid>> AddAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid userId)
         {
             
             using (var transaction = _context.Database.BeginTransaction( System.Data.IsolationLevel.Serializable))
@@ -127,18 +118,17 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
                     }
                     if (!ModelState.IsValid) return BadRequest();
 
-                    var user = await _context.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+                    var user = await _context.Users.Where(x => x.Id == userId).Include(an =>an.Announcements).FirstOrDefaultAsync();
 
                     if (user == null || user.IsDeleted == true) return NotFound("User not found");
 
-                    if (user.AnnouncementsCount >= GetMaxAnnouncementCount())
+                    if (user.Announcements.Count >= _userOptions.Value.MaxAnnouncementCount)
                     {
                         throw new Exception($"Превышено максимальное колличество объяалений!");
                     }
                     var announcement = _mapper.Map<Announcement>(announcementDTO);
-                    announcement.user = user;               
-                    user.AnnouncementsCount++;
-
+                    announcement.user = user;           
+                   
                     _context.Announcements.Add(announcement);
                     await _context.SaveChangesAsync();
 
@@ -156,7 +146,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
        
         //PUT api/announcements
         [HttpPut]
-        public async Task<ActionResult<Guid>> PutAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid announcementId)
+        public async Task<ActionResult<Guid>> UpdateAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid announcementId)
         {
             try
             {
@@ -188,8 +178,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
                 if (announcement == null || announcement.IsDeleted == true) return NotFound();
                
-                announcement.IsDeleted = true;
-                announcement.user.AnnouncementsCount--;
+                announcement.IsDeleted = true;               
                 await _context.SaveChangesAsync();
                 
                 return StatusCode(204);
