@@ -5,6 +5,7 @@ namespace WebApplicationAPI15_SecondStageTS_.dto
 {
 	public class UserDTO
 	{
-		[Required] public string Name { get; set; }
+		[Required(ErrorMessage = "Укажите имя пользователя")]
+		public string Name { get; set; }
 	}
 }

@@ -72,6 +72,10 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
                 return Ok(result);
             }
+            catch (ArgumentNullException e)
+            {
+                return BadRequest(new { e.Message, e.StackTrace });
+            }
             catch (Exception e)
             {
                 return BadRequest(new { e.Message, e.StackTrace });
@@ -110,13 +114,13 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
             {
                 try
                 {
-                    var captchaResponse = await _recaptcha.Validate(Request.Form);
-                    if (!captchaResponse.Success)
-                    {
-                        ModelState.AddModelError("reCaptchaError", "reCAPTCHA error occured. Please try again.");
-                        return RedirectToAction(nameof(Index));
-                    }
-                    if (!ModelState.IsValid) return BadRequest();
+                    //var captchaResponse = await _recaptcha.Validate(Request.Form);
+                    //if (!captchaResponse.Success)
+                    //{
+                    //    ModelState.AddModelError("reCaptchaError", "reCAPTCHA error occured. Please try again.");
+                    //    return RedirectToAction(nameof(Index));
+                    //}
+                    //if (!ModelState.IsValid) return BadRequest();
 
                     var user = await _context.Users.Where(x => x.Id == userId).Include(an =>an.Announcements).FirstOrDefaultAsync();
 

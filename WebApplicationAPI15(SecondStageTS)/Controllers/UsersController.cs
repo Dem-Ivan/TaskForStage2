@@ -31,15 +31,19 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         {
             try
             {
-                IQueryable<User> users = _context.Users;                
+                IQueryable<User> users = _context.Users;
                 users = users.Where(u => u.IsDeleted == false).GetSortBy(u => u.Name, queryData.sortDirection);
                 var pagedResult = users.GetPaged(page, pageSize);
-                
-                GetResult <UserDTO> result = new GetResult<UserDTO>();
+
+                GetResult<UserDTO> result = new GetResult<UserDTO>();
                 result.Rows = await pagedResult.Result.MappingTo<UserDTO>(_mapper);
                 result.CountRowsFound = pagedResult.RowCount;
 
                 return Ok(result);
+            }
+            catch (ArgumentNullException e)
+            {
+                return BadRequest(new { e.Message, e.StackTrace });
             }
             catch (Exception e)
             {
@@ -87,7 +91,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         public async Task<IActionResult> UpdateUser([FromBody]UserDTO userDTO, [FromQuery] Guid userId)
         {
             try
-            {              
+            {
+                if (!ModelState.IsValid) return BadRequest();
                 User user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
 
                 if (user == null || user.IsDeleted == true) return NotFound();
@@ -98,9 +103,9 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
 
                 return Ok(user.Id);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return BadRequest(new { e.Message, e.StackTrace });
+                return StatusCode(500);
             }
            
         }
