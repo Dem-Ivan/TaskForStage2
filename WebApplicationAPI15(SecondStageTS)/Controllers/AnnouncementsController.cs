@@ -106,7 +106,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         }
 
         //POST api/announcements
-        [HttpPost()]       
+        [HttpPost]       
         public async Task<ActionResult<Guid>> AddAnnouncement([FromBody]AnnouncementDTOtoBack announcementDTO, [FromQuery]Guid userId)
         {
             
@@ -173,7 +173,7 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         }
 
         //DELETE api/announcements/5
-        [HttpDelete()]
+        [HttpDelete]
         public async Task<ActionResult> DeleteAnnouncement([FromQuery]Guid id)
         {
             try

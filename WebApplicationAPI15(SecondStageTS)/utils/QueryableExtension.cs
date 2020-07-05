@@ -20,8 +20,8 @@ namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
             pagedResult.PageSize = pageSize;
             pagedResult.RowCount = objects.Count();
 
-            var pageCoutnt = (double)pagedResult.RowCount / pageSize;
-            pagedResult.PageCount = (int)Math.Ceiling(pageCoutnt);
+            var pageCount = (double)pagedResult.RowCount / pageSize;
+            pagedResult.PageCount = (int)Math.Ceiling(pageCount);
 
             var skip = (page - 1) * pageSize;
             pagedResult.Result = objects.Skip(skip).Take(pageSize);         

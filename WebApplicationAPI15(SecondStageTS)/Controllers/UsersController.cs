@@ -111,8 +111,8 @@ namespace WebApplicationAPI15_SecondStageTS_.Controllers
         }
 
         // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteUser(Guid id)
+        [HttpDelete]
+        public async Task<ActionResult> DeleteUser([FromQuery]Guid id)
         {
             var user = await _context.Users.Include(an=>an.Announcements).SingleOrDefaultAsync(u => u.Id == id);
             if (user == null || user.IsDeleted == true) return NotFound();
