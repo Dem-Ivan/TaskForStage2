@@ -12,6 +12,7 @@ namespace WebApplicationAPI15_SecondStageTS_.dto
 		[Required(ErrorMessage = "Не указано значение поля - Image")]
 		public string Image { get; set; }
 		[Required(ErrorMessage = "Не указано значение поля - Rating ")]
-		public int Rating { get; set; }		
+		[Range(0, 10, ErrorMessage = "Значение поля Рейтинг ограничено диапазоном 0-10")]
+		public int Rating { get; set; }
 	}
 }

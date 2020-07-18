@@ -57,6 +57,7 @@
 
   <ItemGroup>
     <Folder Include="..\..\WebApplicationAPI15%2528SecondStageTS%2529\WebApplicationAPI15%2528SecondStageTS%2529\Helpers\" />
+    <Folder Include="..\WebApplicationAPI15%2528SecondStageTS%2529\Vaidation Attribute\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -27,7 +27,7 @@ namespace WebApplicationAPI15_SecondStageTS_
 			services.AddControllers();			
 
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-			services.AddSwaggerGen(c => c.SwaggerDoc("v1",new OpenApiInfo { Title = "My API", Version = "v1"}));
+			services.AddSwaggerGen(c => c.SwaggerDoc("v1",new OpenApiInfo { Title = "Annoucement board", Version = "v1"}));
 
 			services.Configure<ReCaptchaOptions>(Configuration.GetSection("ReCaptcha"));
 			services.Configure<UserOptions>(Configuration);			
@@ -40,7 +40,7 @@ namespace WebApplicationAPI15_SecondStageTS_
 			app.UseSwagger();
 			app.UseSwaggerUI(c=>
 			{
-				c.SwaggerEndpoint(url:"/swagger/v1/swagger.json", name:"My API V1");
+				c.SwaggerEndpoint(url:"/swagger/v1/swagger.json", name: "Annoucement board V1");
 			});
 
 			app.UseDefaultFiles();

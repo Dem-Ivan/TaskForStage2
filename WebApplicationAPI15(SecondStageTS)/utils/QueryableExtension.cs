@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationAPI15_SecondStageTS_.dto;
 using WebApplicationAPI15_SecondStageTS_.utils.Sort;
+using WebApplicationAPI15_SecondStageTS_.Models;
 using System.Diagnostics.CodeAnalysis;
 
 namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
@@ -41,6 +42,19 @@ namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
            
             return objects;
         }
+
+        public static IQueryable<T> SearchForMatches<T>(this IQueryable<T> objects,string searchString) where T : Announcement
+        {
+            searchString = searchString.ToUpper();
+
+            objects = objects.Where(s => (EF.Functions.Like(s.Text.ToUpper(), $"%{searchString}%")) ||
+                (EF.Functions.Like(s.user.Name.ToUpper(), $"%{searchString}%")) || (EF.Functions.Like(s.OrderNumber.ToString(), $"%{searchString}%")) ||
+                (EF.Functions.Like(s.Rating.ToString(), $"%{searchString}%")) || (EF.Functions.Like(s.CreationDate.ToString(), $"%{searchString}%")) ||
+                (EF.Functions.Like(s.Image.ToUpper(), $"%{searchString}%")));
+
+            return objects;
+        }
+
 
         public static async Task<IEnumerable<T>> MappingTo<T>([NotNull]this IQueryable objects, IMapper mapper)
         {
