@@ -1,10 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplicationAPI15_SecondStageTS_.dto
+namespace MessageBoard.dto
 {
-	public class AnnouncementDTOtoBack
+	public class AnnouncementRequest
 	{
 		[Required(ErrorMessage = "Не указано значение поля - Text ")]
 		[StringLength(100, MinimumLength = 5, ErrorMessage = "Длина строки должна быть от 5 до 100 символов")]

@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApplicationAPI15_SecondStageTS_.Context;
-using WebApplicationAPI15_SecondStageTS_.dto;
-using WebApplicationAPI15_SecondStageTS_.Models;
-using WebApplicationAPI15_SecondStageTS_.utils;
-using WebApplicationAPI15_SecondStageTS_.utils.Paging;
+using MessageBoard.Context;
+using MessageBoard.dto;
+using MessageBoard.Models;
+using MessageBoard.utils;
+using MessageBoard.utils.Paging;
 
-namespace WebApplicationAPI15_SecondStageTS_.Controllers
+namespace MessageBoard.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]

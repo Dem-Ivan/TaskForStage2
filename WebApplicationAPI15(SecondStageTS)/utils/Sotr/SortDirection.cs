@@ -1,5 +1,5 @@
 ﻿
-namespace WebApplicationAPI15_SecondStageTS_.utils.Sort
+namespace MessageBoard.utils.Sort
 {
 	public enum SortDirection
 	{

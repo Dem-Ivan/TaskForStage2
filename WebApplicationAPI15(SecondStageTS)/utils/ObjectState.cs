@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebApplicationAPI15_SecondStageTS_.Models;
+﻿using MessageBoard.Models;
 
-namespace WebApplicationAPI15_SecondStageTS_.utils
+namespace MessageBoard.utils
 {
 	public class ObjectState
 	{
 
 		public bool UserNotFound<T>(T entity) where T : User
 		{
-			if (entity == null || entity.IsDeleted == true)
+			if (entity == null || entity.IsDeleted)
 			{ return true; }
 			else
 			{ return false; }
@@ -19,7 +15,7 @@ namespace WebApplicationAPI15_SecondStageTS_.utils
 
 		public bool AnnouncementNotFound<T>(T entity) where T : Announcement
 		{
-			if (entity == null || entity.IsDeleted == true)
+			if (entity == null || entity.IsDeleted)
 			{ return true; }
 			else
 			{ return false; }

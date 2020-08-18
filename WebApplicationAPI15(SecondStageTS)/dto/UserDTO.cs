@@ -1,7 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebApplicationAPI15_SecondStageTS_.dto
+namespace MessageBoard.dto
 {
 	public class UserDTO
 	{

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace WebApplicationAPI15_SecondStageTS_.ProgectExeptions
+namespace MessageBoard.ProgectExeptions
 {
 	public class MaxAnnouncementCountException : Exception
 	{
-		
-
 		public MaxAnnouncementCountException()
 		{
 		}

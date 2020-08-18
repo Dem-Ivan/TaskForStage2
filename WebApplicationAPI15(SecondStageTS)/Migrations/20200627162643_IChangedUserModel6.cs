@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace WebApplicationAPI15_SecondStageTS_.Migrations
+namespace MessageBoard.Migrations
 {
     public partial class IChangedUserModel6 : Migration
     {

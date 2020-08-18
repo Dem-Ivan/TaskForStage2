@@ -5,16 +5,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
-using WebApplicationAPI15_SecondStageTS_.Options;
+using MessageBoard.Options;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
-using WebApplicationAPI15_SecondStageTS_.Context;
-using WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService;
+using MessageBoard.Context;
+using MessageBoard.Services.RecaptchaService;
+using MessageBoard.Repositoryes;
 
-namespace WebApplicationAPI15_SecondStageTS_
+namespace MessageBoard
 {
 	public class Startup
-	{	
+	{
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
@@ -24,23 +25,24 @@ namespace WebApplicationAPI15_SecondStageTS_
 		{
 			string connection = Configuration.GetConnectionString("DefaultConnection");
 			services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
-			services.AddControllers();			
+			services.AddControllers();
 
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-			services.AddSwaggerGen(c => c.SwaggerDoc("v1",new OpenApiInfo { Title = "Annoucement board", Version = "v1"}));
+			services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Annoucement board", Version = "v1" }));
 
 			services.Configure<ReCaptchaOptions>(Configuration.GetSection("ReCaptcha"));
-			services.Configure<UserOptions>(Configuration);			
+			services.Configure<UserOptions>(Configuration);
 			services.AddHttpClient<IRecaptchaService, GoogleRecaptchaService>();
+			services.AddTransient<AnnouncementRepository>();
 		}
 		public void Configure(IApplicationBuilder app)
 		{
 			app.UseDeveloperExceptionPage();
-		
+
 			app.UseSwagger();
-			app.UseSwaggerUI(c=>
+			app.UseSwaggerUI(c =>
 			{
-				c.SwaggerEndpoint(url:"/swagger/v1/swagger.json", name: "Annoucement board V1");
+				c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "Annoucement board V1");
 			});
 
 			app.UseDefaultFiles();

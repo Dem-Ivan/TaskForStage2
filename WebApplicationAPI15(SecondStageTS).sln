@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplicationAPI15(SecondStageTS)", "WebApplicationAPI15(SecondStageTS)\WebApplicationAPI15(SecondStageTS).csproj", "{906FF7A9-FF83-4847-91A3-25DF3A0090E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBoard", "WebApplicationAPI15(SecondStageTS)\MessageBoard.csproj", "{906FF7A9-FF83-4847-91A3-25DF3A0090E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

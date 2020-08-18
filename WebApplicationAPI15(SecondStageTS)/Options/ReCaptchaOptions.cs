@@ -1,5 +1,5 @@
 ﻿
-namespace WebApplicationAPI15_SecondStageTS_.Options
+namespace MessageBoard.Options
 {
 	public class ReCaptchaOptions
 	{

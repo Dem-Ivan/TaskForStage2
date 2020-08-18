@@ -1,20 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebApplicationAPI15_SecondStageTS_.utils.Sort;
+﻿using System;
+using MessageBoard.utils.Sort;
 
-namespace WebApplicationAPI15_SecondStageTS_.utils
+namespace MessageBoard.utils
 {
 	public class QueryData
-	{		
-		public string? searchString { get; set;}
+	{
+		public string SearchString { get; set; }
 
 		public Guid? FilterByUserId { get; set; }
 
-		public string? sortName { get; set; } = "CreationDate";
-	
+		public string SortName { get; set; } = "CreationDate";
+
 		public SortDirection? sortDirection { get; set; } = SortDirection.Asc;
 	}
 }

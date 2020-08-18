@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using WebApplicationAPI15_SecondStageTS_.Context;
+using MessageBoard.Context;
 
-namespace WebApplicationAPI15_SecondStageTS_.Migrations
+namespace MessageBoard.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
     [Migration("20200602124306_IChangedAnnModel")]

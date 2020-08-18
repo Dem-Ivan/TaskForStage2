@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace WebApplicationAPI15_SecondStageTS_.Migrations
+namespace MessageBoard.Migrations
 {
     public partial class IChangedAnnModel : Migration
     {

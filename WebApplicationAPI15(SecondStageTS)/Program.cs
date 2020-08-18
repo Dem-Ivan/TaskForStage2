@@ -3,15 +3,15 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using WebApplicationAPI15_SecondStageTS_.Context;
-using WebApplicationAPI15_SecondStageTS_.Services;
+using MessageBoard.Context;
+using MessageBoard.Services;
 
-namespace WebApplicationAPI15_SecondStageTS_
+namespace MessageBoard
 {
 	public class Program
 	{
 		public static void Main(string[] args)
-		{		
+		{
 			var host = CreateWebHostBuilder(args).Build();
 			using (var scope = host.Services.CreateScope())
 			{
@@ -23,8 +23,8 @@ namespace WebApplicationAPI15_SecondStageTS_
 					SimpleData.Initialize(context);
 				}
 				catch (Exception)
-				{
-					var loger = services.GetRequiredService<ILogger<Program>>();					
+				{					
+					//var loger = services.GetRequiredService<ILogger<Program>>();
 				}
 			}
 			host.Run();

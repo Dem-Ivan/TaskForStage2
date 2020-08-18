@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace WebApplicationAPI15_SecondStageTS_.dto
+namespace MessageBoard.dto
 {
-	public class AnnouncementDTOtoFront
+	public class AnnouncementRespons
 	{
 		public int OrderNumber { get; set; }
 		public UserDTO userDTO { get; set; }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
+namespace MessageBoard.utils.Paging
 {
 	public abstract class PagedResultBase
 	{
@@ -9,7 +9,7 @@ namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
 		public int PageSize { get; set; }
 		public int RowCount { get; set; }
 
-		public int FirstRowOnPage 
+		public int FirstRowOnPage
 		{
 			get { return (CurrentPage - 1) * PageSize + 1; }
 		}
@@ -20,5 +20,5 @@ namespace WebApplicationAPI15_SecondStageTS_.utils.Paging
 		}
 	}
 
-	
+
 }

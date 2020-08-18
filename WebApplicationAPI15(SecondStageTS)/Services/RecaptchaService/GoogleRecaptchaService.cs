@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using WebApplicationAPI15_SecondStageTS_.Options;
+using MessageBoard.Options;
 
-namespace WebApplicationAPI15_SecondStageTS_.Services.RecaptchaService
+namespace MessageBoard.Services.RecaptchaService
 {
 	public class GoogleRecaptchaService : IRecaptchaService
 	{
