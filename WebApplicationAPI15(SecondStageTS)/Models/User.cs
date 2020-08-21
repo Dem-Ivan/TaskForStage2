@@ -9,6 +9,5 @@ namespace MessageBoard.Models
 		public string Name { get; set; }
 		public bool IsDeleted { get; set; } = false;
 		public List<Announcement> Announcements { get; }
-
 	}
 }

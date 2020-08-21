@@ -8,7 +8,7 @@ namespace MessageBoard.Helpers
 	{
 		public AutoMapperProfile()
 		{
-			//CreateMap<Announcement, AnnouncementRespons>();
+			CreateMap<Announcement, AnnouncementRespons>();
 			CreateMap<User, UserDTO>();
 			CreateMap<UserDTO, User>().ForAllMembers(n => n.Condition((src, dest, srcMember) => srcMember != null));
 			CreateMap<Announcement, AnnouncementRespons>().ForMember(x => x.userDTO, o => o.MapFrom(s => s.user));

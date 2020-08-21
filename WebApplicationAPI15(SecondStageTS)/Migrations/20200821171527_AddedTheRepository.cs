@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MessageBoard.Migrations
 {
-    public partial class Initial2 : Migration
+    public partial class AddedTheRepository : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,10 +12,9 @@ namespace MessageBoard.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    IsDeleted = table.Column<bool>(nullable: true),
-                    AnnouncementsCount = table.Column<int>(nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -25,14 +25,15 @@ namespace MessageBoard.Migrations
                 name: "Announcements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    OrderNumber = table.Column<int>(nullable: false),
-                    UserId = table.Column<Guid>(nullable: false),
-                    Text = table.Column<string>(maxLength: 100, nullable: false),
-                    Image = table.Column<string>(nullable: false),
-                    Rating = table.Column<int>(nullable: false),
-                    CreationDate = table.Column<DateTime>(nullable: false),
-                    IsDeleted = table.Column<bool>(nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderNumber = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: true),
+                    Image = table.Column<string>(type: "text", nullable: true),
+                    Rating = table.Column<int>(type: "integer", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

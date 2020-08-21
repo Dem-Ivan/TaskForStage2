@@ -11,6 +11,7 @@ using System.IO;
 using MessageBoard.Context;
 using MessageBoard.Services.RecaptchaService;
 using MessageBoard.Repositoryes;
+using MessageBoard.dto;
 
 namespace MessageBoard
 {
@@ -34,6 +35,7 @@ namespace MessageBoard
 			services.Configure<UserOptions>(Configuration);
 			services.AddHttpClient<IRecaptchaService, GoogleRecaptchaService>();
 			services.AddTransient<AnnouncementRepository>();
+			//services.AddTransient<IRepository<AnnouncementRespons, AnnouncementRequest>, AnnouncementRepository>();
 		}
 		public void Configure(IApplicationBuilder app)
 		{
