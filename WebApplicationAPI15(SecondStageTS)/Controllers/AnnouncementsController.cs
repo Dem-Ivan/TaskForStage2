@@ -18,7 +18,7 @@ namespace MessageBoard.Controllers
 		private IRepository<AnnouncementRespons, AnnouncementRequest> _db;
 		
 
-		public AnnouncementsController( IRecaptchaService recaptcha, AnnouncementRepository db)
+		public AnnouncementsController( IRecaptchaService recaptcha, IRepository<AnnouncementRespons, AnnouncementRequest> db)
 		{
 			_recaptcha = recaptcha ?? throw new ArgumentNullException(nameof(recaptcha));
 			_db = db ?? throw new ArgumentNullException(nameof(db));

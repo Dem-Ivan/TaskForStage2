@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MessageBoard.Repositoryes
 {
-	interface IRepository<T, TKey>  where T : class
+	public interface IRepository<T, TKey>  where T : class
 	{
 		Task<GetResult<T>> GetList(QueryData queryData, int page, int pageSize = 25);
 		Task<T> Get(Guid Id);
