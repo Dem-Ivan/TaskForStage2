@@ -47,9 +47,14 @@ namespace MessageBoard.utils.Paging
 		{
 			searchString = searchString.ToUpper();
 
-			objects = objects.Where(s => (EF.Functions.Like(s.Text.ToUpper(), $"%{searchString}%")) ||
-				(EF.Functions.Like(s.user.Name.ToUpper(), $"%{searchString}%")) || (EF.Functions.Like(s.OrderNumber.ToString(), $"%{searchString}%")) ||
-				(EF.Functions.Like(s.Rating.ToString(), $"%{searchString}%")) || (EF.Functions.Like(s.CreationDate.ToString("d", DateTimeFormatInfo.InvariantInfo), $"%{searchString}%")));
+			objects = objects.Where(s =>
+				(EF.Functions.Like(s.Text.ToUpper(), $"%{searchString}%")) ||
+				(EF.Functions.Like(s.user.Name.ToUpper(), $"%{searchString}%")) ||
+				(EF.Functions.Like(s.OrderNumber.ToString(), $"%{searchString}%")) || 
+				(EF.Functions.Like(s.Rating.ToString(), $"%{searchString}%")) ||
+				(EF.Functions.Like(s.CreationDate.ToString(), $"%{searchString}%"))
+				//(EF.Functions.Like(s.CreationDate.ToString("d", DateTimeFormatInfo.InvariantInfo), $"%{searchString}%"))
+				); 		
 
 			return objects;
 		}

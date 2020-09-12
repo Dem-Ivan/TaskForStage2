@@ -16,16 +16,8 @@ namespace MessageBoard
 			using (var scope = host.Services.CreateScope())
 			{
 				var services = scope.ServiceProvider;
-
-				try
-				{
-					var context = services.GetRequiredService<ApplicationContext>();
-					SimpleData.Initialize(context);
-				}
-				catch (Exception)
-				{					
-					//var loger = services.GetRequiredService<ILogger<Program>>();
-				}
+				var context = services.GetRequiredService<ApplicationContext>();
+				SimpleData.Initialize(context);
 			}
 			host.Run();
 		}

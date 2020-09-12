@@ -31,8 +31,8 @@ namespace MessageBoard.Controllers
 		{
 			if (!ModelState.IsValid) return BadRequest();
 			try
-			{
-				return Ok(_db.GetList(queryData, page, pageSize));
+			{				
+				return Ok(await _db.GetObjectList(queryData, page, pageSize));				
 			}
 			catch (ObjectNotFoundException)
 			{
@@ -46,11 +46,9 @@ namespace MessageBoard.Controllers
 		public async Task<ActionResult<AnnouncementRespons>> GetAnnouncement(Guid announcementId)
 		{
 			if (!ModelState.IsValid) return BadRequest();
-
 			try
-			{				
-				var ann = _db.Get(announcementId);
-				return Ok(ann);
+			{						
+				return Ok(await _db.GetObject(announcementId));
 			}
 			catch (ObjectNotFoundException)
 			{
@@ -62,14 +60,12 @@ namespace MessageBoard.Controllers
 		[HttpPost]
 		public async Task<ActionResult<Guid>> AddAnnouncement([FromBody]AnnouncementRequest announcementDTO, [FromQuery]Guid userId)
 		{
-			var captchaResponse = await _recaptcha.Validate(Request.Form);
-			if (!captchaResponse.Success) throw new ReCaptchaErrorException("Не улалось пройти рекапчу, попробуйте снова!");
+			//var captchaResponse = await _recaptcha.Validate(Request.Form);
+			//if (!captchaResponse.Success) throw new ReCaptchaErrorException("Не удалось пройти рекапчу, попробуйте снова!");
 			if (!ModelState.IsValid) return BadRequest();
-
 			try
-			{
-				_db.Create(announcementDTO, userId);		
-				return StatusCode(201);				
+			{					
+				return StatusCode(201, await _db.CreateObject(announcementDTO, userId));				
 			}
 			catch (ReCaptchaErrorException e)
 			{
@@ -87,9 +83,8 @@ namespace MessageBoard.Controllers
 		{
 			if (!ModelState.IsValid) return BadRequest();
 			try
-			{
-				_db.Update(announcementDTO, announcementId);			
-				return Ok();
+			{							
+				return Ok(await _db.UpdateObject(announcementDTO, announcementId));
 			}
 			catch (ObjectNotFoundException)
 			{
@@ -103,9 +98,8 @@ namespace MessageBoard.Controllers
 		{
 			if (!ModelState.IsValid) return BadRequest();
 			try
-			{
-				_db.Delete(announcementId);		
-				return StatusCode(204);
+			{					
+				return StatusCode(204, await _db.DeleteObject(announcementId));
 			}
 			catch (ObjectNotFoundException)
 			{

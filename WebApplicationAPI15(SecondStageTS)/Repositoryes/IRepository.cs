@@ -7,10 +7,10 @@ namespace MessageBoard.Repositoryes
 {
 	public interface IRepository<T, TKey>  where T : class
 	{
-		Task<GetResult<T>> GetList(QueryData queryData, int page, int pageSize = 25);
-		Task<T> Get(Guid Id);
-		void Create(TKey item, Guid Id);
-		void Update(TKey item, Guid Id);
-		void Delete(Guid Id);		
+		Task<GetResult<T>> GetObjectList(QueryData queryData, int page, int pageSize = 25);
+		Task<T> GetObject(Guid Id);
+		Task<Guid> CreateObject(TKey item, Guid Id);
+		Task<Guid> UpdateObject(TKey item, Guid Id);
+		Task<Guid> DeleteObject(Guid Id);		
 	}
 }

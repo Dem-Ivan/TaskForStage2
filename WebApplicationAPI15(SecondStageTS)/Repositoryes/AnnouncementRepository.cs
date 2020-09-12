@@ -21,7 +21,7 @@ namespace MessageBoard.Repositoryes
 	public class AnnouncementRepository : IRepository<AnnouncementRespons, AnnouncementRequest>
 	{
 		private ApplicationContext db;
-		private ObjectState _objecState = new ObjectState();//добавить в DI?
+		private ObjectState _objecState = new ObjectState();
 		private readonly IMapper _mapper;
 		private readonly IOptions<UserOptions> _userOptions;
 		private ILogger _logger;
@@ -33,14 +33,13 @@ namespace MessageBoard.Repositoryes
 			_userOptions = userOptions ?? throw new ArgumentNullException(nameof(userOptions));																			  
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
-		public async Task<GetResult<AnnouncementRespons>> GetList(QueryData queryData, int page, int pageSize)
+		public async Task<GetResult<AnnouncementRespons>> GetObjectList(QueryData queryData, int page, int pageSize)
 		{
 			IQueryable<Announcement> announcementsQuery = db.Announcements.Where(an => an.IsDeleted == false);
 
 			if (!string.IsNullOrEmpty(queryData.SearchString))
 			{
-				announcementsQuery = announcementsQuery.SearchForMatches(queryData.SearchString);
-				if (announcementsQuery == null) throw new ObjectNotFoundException();//////////////////////////нужен тестовый прогон!
+				announcementsQuery = announcementsQuery.SearchForMatches(queryData.SearchString);				
 			}
 			if (queryData.FilterByUserId != null)//если передан userId - проводим фильтрацию по userId
 			{
@@ -62,7 +61,7 @@ namespace MessageBoard.Repositoryes
 
 			return result;
 		}
-		public async Task<AnnouncementRespons> Get(Guid Id)
+		public async Task<AnnouncementRespons> GetObject(Guid Id)
 		{
 			var query = db.Announcements.Where(an => an.Id == Id && an.IsDeleted == false);
 			var announcementDTO = await _mapper.ProjectTo<AnnouncementRespons>(query).SingleOrDefaultAsync();
@@ -71,10 +70,10 @@ namespace MessageBoard.Repositoryes
 
 			return announcementDTO;
 		}
-		public async void Create(AnnouncementRequest item, Guid Id)
+		public async Task<Guid> CreateObject(AnnouncementRequest item, Guid Id)
 		{
 			var user = await db.Users.Where(x => x.Id == Id).FirstOrDefaultAsync();
-
+			Announcement announcement = null;
 			if (_objecState.UserNotFound(user)) throw new ObjectNotFoundException();
 
 			using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
@@ -85,10 +84,11 @@ namespace MessageBoard.Repositoryes
 					{
 						throw new MaxAnnouncementCountException($"Превышено максимальное колличество объяалений!");
 					}
-					var announcement = _mapper.Map<Announcement>(item);
+					announcement = _mapper.Map<Announcement>(item);
 					announcement.user = user;
 
-					db.Announcements.Add(announcement);
+					//db.Announcements.Add(announcement);
+					await db.Announcements.AddAsync(announcement);
 
 					transaction.Commit();
 					await db.SaveChangesAsync();					
@@ -102,11 +102,11 @@ namespace MessageBoard.Repositoryes
 				{
 					transaction.Rollback();
 					_logger.Log(LogLevel.Warning, "Some Exception in AddAnnouncement() {0}", e);					
-				}
-							
+				}							
 			}
+			return (announcement.Id);
 		}
-		public async void Update(AnnouncementRequest item, Guid Id)
+		public async Task<Guid> UpdateObject(AnnouncementRequest item, Guid Id)
 		{
 			Announcement announcement = await db.Announcements.Include(u => u.user).SingleOrDefaultAsync(an => an.Id == Id);
 
@@ -116,8 +116,9 @@ namespace MessageBoard.Repositoryes
 			
 			db.Update(announcement);
 			await db.SaveChangesAsync();
+			return (announcement.Id);
 		}
-		public async void  Delete(Guid Id)
+		public async Task<Guid> DeleteObject(Guid Id)
 		{		
 			Announcement announcement = await db.Announcements.SingleOrDefaultAsync(an => an.Id == Id);
 
@@ -125,6 +126,7 @@ namespace MessageBoard.Repositoryes
 
 			announcement.IsDeleted = true;
 			await db.SaveChangesAsync();
+			return (announcement.Id);
 		}			
 	}
 }
