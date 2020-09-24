@@ -19,7 +19,7 @@ namespace MessageBoard.Context
 			if (modelBuilder == null) throw new ArgumentNullException(nameof(modelBuilder));
 
 			modelBuilder.Entity<Announcement>()
-				.HasOne(u => u.user)
+				.HasOne(u => u.User)
 				.WithMany(an => an.Announcements)
 				.HasForeignKey(u => u.UserId);
 		}

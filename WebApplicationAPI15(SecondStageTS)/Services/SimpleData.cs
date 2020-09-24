@@ -18,35 +18,35 @@ namespace MessageBoard.Services
 				context.Announcements.AddRange(
 					new Announcement
 					{
-						user = jon,
+						User = jon,
 						Text = "Продам Трактор",
 						Image = "1.png",
 						Rating = 1
 					},
 					new Announcement
 					{
-						user = jon,
+						User = jon,
 						Text = "Продам велосипед",
 						Image = "2.png",
 						Rating = 2
 					},
 					new Announcement
 					{
-						user = jon,
+						User = jon,
 						Text = "Продам квартиру",
 						Image = "3.png",
 						Rating = 3
 					},
 					new Announcement
 					{
-						user = sem,
+						User = sem,
 						Text = "Куплю трактор",
 						Image = "2.png",
 						Rating = 4
 					},
 					new Announcement
 					{
-						user = allis,
+						User = allis,
 						Text = "Учу английскому",
 						Image = "1.png",
 						Rating = 5

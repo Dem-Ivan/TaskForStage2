@@ -5,93 +5,97 @@ using MessageBoard.Models;
 using MessageBoard.Options;
 using MessageBoard.ProgectExceptions;
 using MessageBoard.ProgectExeptions;
-using MessageBoard.Services.RecaptchaService;
 using MessageBoard.utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MessageBoard.utils.Paging;
+using System.Threading;
 
 namespace MessageBoard.Repositoryes
 {
 	public class AnnouncementRepository : IRepository<AnnouncementRespons, AnnouncementRequest>
 	{
-		private ApplicationContext db;
-		private ObjectState _objecState = new ObjectState();
+		private ApplicationContext _context;
+	
 		private readonly IMapper _mapper;
 		private readonly IOptions<UserOptions> _userOptions;
 		private ILogger _logger;
 
 		public AnnouncementRepository(IMapper mapper, IOptions<UserOptions> userOptions, ApplicationContext context, ILogger<AnnouncementRepository> logger)
 		{
-			this.db = context ?? throw new ArgumentNullException(nameof(context));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+			_context = context ?? throw new ArgumentNullException(nameof(context));			
 			_userOptions = userOptions ?? throw new ArgumentNullException(nameof(userOptions));																			  
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
-		public async Task<GetResult<AnnouncementRespons>> GetObjectList(QueryData queryData, int page, int pageSize)
+		public async Task<GetResult<AnnouncementRespons>> GetObjectList(QueryData queryData, int page, int pageSize, CancellationToken cancellationToken)
 		{
-			IQueryable<Announcement> announcementsQuery = db.Announcements.Where(an => an.IsDeleted == false);
-
+			IQueryable<Announcement> announcementsQuery = _context.Announcements.Where(an => an.IsDeleted == false);
+			
 			if (!string.IsNullOrEmpty(queryData.SearchString))
 			{
-				announcementsQuery = announcementsQuery.SearchForMatches(queryData.SearchString);				
+				announcementsQuery = announcementsQuery.SearchForMatches(queryData.SearchString);
 			}
 			if (queryData.FilterByUserId != null)//если передан userId - проводим фильтрацию по userId
 			{
-				announcementsQuery = announcementsQuery.Where(w => w.UserId == queryData.FilterByUserId && w.user.IsDeleted == false);
+				announcementsQuery = announcementsQuery.Where(w => w.UserId == queryData.FilterByUserId && w.User.IsDeleted == false);
 			}
 
-			announcementsQuery = queryData.SortName switch
+			if ("ORDERNUMBER".StartsWith(queryData.SortName.ToUpper()))
 			{
-				"OrderNumber" => announcementsQuery.GetSortBy(x => x.OrderNumber, queryData.sortDirection),
-				"Rating" => announcementsQuery.GetSortBy(x => x.Rating, queryData.sortDirection),
-				_ => announcementsQuery.GetSortBy(x => x.CreationDate, queryData.sortDirection)
-			};
-
-			var pagedResult = announcementsQuery.GetPaged(page, pageSize);
-
-			GetResult<AnnouncementRespons> result = new GetResult<AnnouncementRespons>();
-			result.Rows = await pagedResult.Result.MappingTo<AnnouncementRespons>(_mapper);
-			result.CountRowsFound = pagedResult.RowCount;
+				announcementsQuery = announcementsQuery.GetSortBy(x => x.OrderNumber, queryData.sortDirection);
+			}
+			else if ("RATING".StartsWith(queryData.SortName.ToUpper()))
+			{
+				announcementsQuery = announcementsQuery.GetSortBy(x => x.Rating, queryData.sortDirection);
+			}
+			else announcementsQuery = announcementsQuery.GetSortBy(x => x.CreationDate, queryData.sortDirection);
+			
+			PagedResult<AnnouncementRespons> pagedResult = await announcementsQuery.GetPaged<AnnouncementRespons, Announcement>(page, pageSize, _mapper, cancellationToken);
+			GetResult<AnnouncementRespons> result = new GetResult<AnnouncementRespons>
+			{
+				Data = pagedResult.Result,
+				Count = pagedResult.RowCount
+			};			
 
 			return result;
 		}
-		public async Task<AnnouncementRespons> GetObject(Guid Id)
-		{
-			var query = db.Announcements.Where(an => an.Id == Id && an.IsDeleted == false);
-			var announcementDTO = await _mapper.ProjectTo<AnnouncementRespons>(query).SingleOrDefaultAsync();
+		public async Task<AnnouncementRespons> GetObject(Guid Id, CancellationToken cancellationToken)
+		{					
+			var query = _context.Announcements.Where(an => an.Id == Id && an.IsDeleted == false);
+			var announcementDTO = await _mapper.ProjectTo<AnnouncementRespons>(query).SingleOrDefaultAsync(cancellationToken);
+			
 
 			if (announcementDTO == null) throw new ObjectNotFoundException();
 
 			return announcementDTO;
 		}
-		public async Task<Guid> CreateObject(AnnouncementRequest item, Guid Id)
+		public async Task<Guid> CreateObject(AnnouncementRequest item, Guid Id, CancellationToken cancellationToken)
 		{
-			var user = await db.Users.Where(x => x.Id == Id).FirstOrDefaultAsync();
+			var user = await _context.Users.Where(x => x.Id == Id).FirstOrDefaultAsync(cancellationToken);
 			Announcement announcement = null;
-			if (_objecState.UserNotFound(user)) throw new ObjectNotFoundException();
+			if (user.NotFound()) throw new ObjectNotFoundException();
 
-			using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
+			using (var transaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
 			{
 				try
 				{
-					if (db.Announcements.Where(an => an.UserId == Id && !an.IsDeleted).Count() >= _userOptions.Value.MaxAnnouncementCount)
+					if (_context.Announcements.Where(an => an.UserId == Id && !an.IsDeleted).Count() >= _userOptions.Value.MaxAnnouncementCount)
 					{
 						throw new MaxAnnouncementCountException($"Превышено максимальное колличество объяалений!");
 					}
 					announcement = _mapper.Map<Announcement>(item);
-					announcement.user = user;
+					announcement.User = user;
 
 					//db.Announcements.Add(announcement);
-					await db.Announcements.AddAsync(announcement);
+					await _context.Announcements.AddAsync(announcement, cancellationToken);
 
 					transaction.Commit();
-					await db.SaveChangesAsync();					
+					await _context.SaveChangesAsync(cancellationToken);					
 				}				
 				catch (MaxAnnouncementCountException e)
 				{
@@ -106,26 +110,26 @@ namespace MessageBoard.Repositoryes
 			}
 			return (announcement.Id);
 		}
-		public async Task<Guid> UpdateObject(AnnouncementRequest item, Guid Id)
+		public async Task<Guid> UpdateObject(AnnouncementRequest item, Guid Id, CancellationToken cancellationToken)
 		{
-			Announcement announcement = await db.Announcements.Include(u => u.user).SingleOrDefaultAsync(an => an.Id == Id);
+			Announcement announcement = await _context.Announcements.Include(u => u.User).SingleOrDefaultAsync(an => an.Id == Id);
 
-			if (_objecState.AnnouncementNotFound(announcement)) throw new ObjectNotFoundException();
+			if (announcement.NotFound()) throw new ObjectNotFoundException();
 
 			_mapper.Map(item, announcement);
-			
-			db.Update(announcement);
-			await db.SaveChangesAsync();
-			return (announcement.Id);
-		}
-		public async Task<Guid> DeleteObject(Guid Id)
-		{		
-			Announcement announcement = await db.Announcements.SingleOrDefaultAsync(an => an.Id == Id);
+			_context.Update(announcement);
+			await _context.SaveChangesAsync(cancellationToken);
 
-			if (_objecState.AnnouncementNotFound(announcement)) throw new ObjectNotFoundException();
+			return announcement.Id;
+		}
+		public async Task<Guid> DeleteObject(Guid Id, CancellationToken cancellationToken)
+		{		
+			Announcement announcement = await _context.Announcements.SingleOrDefaultAsync(an => an.Id == Id, cancellationToken);
+
+			if (announcement.NotFound()) throw new ObjectNotFoundException();
 
 			announcement.IsDeleted = true;
-			await db.SaveChangesAsync();
+			await _context.SaveChangesAsync(cancellationToken);
 			return (announcement.Id);
 		}			
 	}
