@@ -8,14 +8,14 @@ namespace MessageBoard.Services
 	{
 		public static void Initialize(ApplicationContext context)
 		{
-			if (!context.Users.Any())
+			if (!context.Set<User>().Any())
 			{
 				User jon = new User { Name = "Jon" };
 				User sem = new User { Name = "Sem" };
 				User allis = new User { Name = "Allis" };
-				context.Users.AddRange(jon, sem, allis);
+				context.AddRange(jon, sem, allis);
 
-				context.Announcements.AddRange(
+				context.AddRange(
 					new Announcement
 					{
 						User = jon,

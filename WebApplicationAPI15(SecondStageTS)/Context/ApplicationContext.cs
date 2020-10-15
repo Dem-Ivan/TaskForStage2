@@ -6,10 +6,7 @@ namespace MessageBoard.Context
 {
 	public class ApplicationContext : DbContext
 	{
-		public DbSet<User> Users { get; set; }
-		public DbSet<Announcement> Announcements { get; set; }
 
-		
 		public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
 		{
 
@@ -18,6 +15,9 @@ namespace MessageBoard.Context
 		{
 			if (modelBuilder == null) throw new ArgumentNullException(nameof(modelBuilder));
 
+			modelBuilder.Entity<User>();
+			modelBuilder.Entity<Announcement>();
+			
 			modelBuilder.Entity<Announcement>()
 				.HasOne(u => u.User)
 				.WithMany(an => an.Announcements)

@@ -14,15 +14,15 @@ namespace MessageBoard.Controllers
 	public class UsersController : ControllerBase
 	{		
 		
-		private readonly IRepository<UserDto, UserDto> _repository;
+		private readonly IUserRepository<UserDto, UserDto> _repository;
 
-		public UsersController(IRepository<UserDto, UserDto> repository)
+		public UsersController(IUserRepository<UserDto, UserDto> repository)
 		{
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 		}
 
 		// GET: api/Users
-		[HttpGet]
+		[HttpGet("{page}/{pageSize}")]
 		public async Task<ActionResult<GetResult<UserDto>>> GetUsers([FromQuery] QueryData queryData, int page = 1, int pageSize = 25, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
@@ -32,7 +32,7 @@ namespace MessageBoard.Controllers
 		}
 		
 		// GET: api/Users/5
-		[HttpGet("{id}")]
+		[HttpGet("{userId}")]
 		public async Task<ActionResult<UserDto>> GetUser(Guid userId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
@@ -49,13 +49,12 @@ namespace MessageBoard.Controllers
 		[HttpPost]
 		public async Task<ActionResult<Guid>> AddUser(UserDto userDTO, CancellationToken cancellationToken = default)
 		{
-			if (!ModelState.IsValid) return BadRequest();
-			Guid Id = new Guid();
-			return StatusCode(201, await _repository.CreateObject(userDTO, Id, cancellationToken));
+			if (!ModelState.IsValid) return BadRequest();			
+			return StatusCode(201, await _repository.CreateObject(userDTO, cancellationToken));
 		}
 
-		[HttpPut]//("{id}")
-		public async Task<IActionResult> UpdateUser([FromBody]UserDto userDTO,  Guid userId, CancellationToken cancellationToken = default)
+		[HttpPut("{userId}")]
+		public async Task<IActionResult> UpdateUser([FromBody]UserDto userDTO, Guid userId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
 			try
@@ -69,7 +68,7 @@ namespace MessageBoard.Controllers
 		}
 
 		// DELETE: api/Users/5
-		[HttpDelete]
+		[HttpDelete("{userId}")]
 		public async Task<ActionResult> DeleteUser(Guid userId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();

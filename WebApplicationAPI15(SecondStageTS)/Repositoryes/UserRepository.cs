@@ -14,10 +14,10 @@ using System.Threading.Tasks;
 
 namespace MessageBoard.Repositoryes
 {
-	public class UserRepository : IRepository<UserDto, UserDto>
+	public class UserRepository : IUserRepository<UserDto, UserDto>
 	{
 		private readonly IMapper _mapper;
-		private ApplicationContext _context;
+		private readonly ApplicationContext _context;
 
 		public UserRepository(IMapper mapper, ApplicationContext context)
 		{
@@ -27,7 +27,7 @@ namespace MessageBoard.Repositoryes
 
 		public async Task<GetResult<UserDto>> GetObjectList(QueryData queryData, int page, int pageSize, CancellationToken cancellationToken)
 		{
-			IQueryable<User> usersQuery = _context.Users.Where(u => u.IsDeleted == false).GetSortBy(u => u.Name, queryData.sortDirection);
+			IQueryable<User> usersQuery = _context.Set<User>().Where(u => u.IsDeleted == false).GetSortBy(u => u.Name, queryData.sortDirection);
 
 			PagedResult<UserDto> pagedResult = await usersQuery.GetPaged<UserDto, User>(page, pageSize, _mapper, cancellationToken);
 
@@ -41,18 +41,18 @@ namespace MessageBoard.Repositoryes
 		}
 		public async Task<UserDto> GetObject(Guid Id, CancellationToken cancellationToken)
 		{
-			IQueryable<User> query = _context.Users.Where(u => u.Id == Id && u.IsDeleted == false);
+			IQueryable<User> query = _context.Set<User>().Where(u => u.Id == Id && u.IsDeleted == false);
 
 			var userDTO = await _mapper.ProjectTo<UserDto>(query).SingleOrDefaultAsync(cancellationToken);
 			if (userDTO == null) throw new ObjectNotFoundException();
 
 			return userDTO;
 		}
-		public async Task<Guid> CreateObject(UserDto item, Guid Id, CancellationToken cancellationToken)
+		public async Task<Guid> CreateObject(UserDto item, CancellationToken cancellationToken)
 		{
 			var user = _mapper.Map<User>(item);
 
-			await _context.Users.AddAsync(user, cancellationToken);
+			await _context.AddAsync<User>(user, cancellationToken);
 			await _context.SaveChangesAsync(cancellationToken);
 
 			return user.Id;
@@ -60,12 +60,12 @@ namespace MessageBoard.Repositoryes
 
 		public async Task<Guid> UpdateObject(UserDto item, Guid Id, CancellationToken cancellationToken)
 		{
-			User user = await _context.Users.SingleOrDefaultAsync(u => u.Id == Id, cancellationToken);
+			User user = await _context.Set<User>().SingleOrDefaultAsync(u => u.Id == Id, cancellationToken);
 
 			if (user.NotFound()) throw new ObjectNotFoundException();
 
 			_mapper.Map(item, user);
-			_context.Update(user);
+			_context.Update<User>(user);
 			await _context.SaveChangesAsync(cancellationToken);
 
 			return user.Id;
@@ -73,7 +73,7 @@ namespace MessageBoard.Repositoryes
 
 		public async Task<Guid> DeleteObject(Guid Id, CancellationToken  cancellationToken)
 		{
-			var user = await _context.Users.Include(an => an.Announcements).SingleOrDefaultAsync(u => u.Id == Id, cancellationToken);
+			var user = await _context.Set<User>().Include(an => an.Announcements).SingleOrDefaultAsync(u => u.Id == Id, cancellationToken);
 
 			if (user.NotFound()) throw new ObjectNotFoundException();
 

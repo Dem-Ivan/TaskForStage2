@@ -8,6 +8,7 @@ using MessageBoard.utils;
 using MessageBoard.Repositoryes;
 using MessageBoard.ProgectExceptions;
 using System.Threading;
+using MessageBoard.Context;
 
 namespace MessageBoard.Controllers
 {
@@ -16,12 +17,14 @@ namespace MessageBoard.Controllers
 	public class AnnouncementsController : ControllerBase
 	{
 		private readonly IRecaptchaService _recaptcha;		
-		private readonly IRepository<AnnouncementRespons, AnnouncementRequest> _repository;
+		private readonly IAnnRepository<AnnouncementRespons, AnnouncementRequest> _repository;
+		private readonly ApplicationContext _context;
 
-		public AnnouncementsController( IRecaptchaService recaptcha, IRepository<AnnouncementRespons, AnnouncementRequest> repository)
+		public AnnouncementsController( IRecaptchaService recaptcha, IAnnRepository<AnnouncementRespons, AnnouncementRequest> repository, ApplicationContext context)
 		{
 			_recaptcha = recaptcha ?? throw new ArgumentNullException(nameof(recaptcha));
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
 		//GET api/announcements/1/5   
@@ -29,13 +32,15 @@ namespace MessageBoard.Controllers
 		public async Task<ActionResult<GetResult<AnnouncementRespons>>> GetAnnouncements([FromQuery] QueryData queryData, int page = 1, int pageSize = 25, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
-						
-			return Ok(await _repository.GetObjectList(queryData, page, pageSize, cancellationToken));										
+
+			return Ok(await _repository.GetObjectList(queryData, page, pageSize, cancellationToken));		
+			//var annn = _context.Announcements.FromSqlRaw("SELECT * FROM public.\"Announcements\"");
+			//var ann = _context.Announcements.FromSqlRaw("qwe").ToList();			
 		}
 
 
 		//GET api/announcements/5     
-		[HttpGet]
+		[HttpGet("{announcementId}")]
 		public async Task<ActionResult<AnnouncementRespons>> GetAnnouncement(Guid announcementId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
@@ -71,7 +76,7 @@ namespace MessageBoard.Controllers
 		}
 
 		//PUT api/announcements
-		[HttpPut]
+		[HttpPut("{announcementId}")]
 		public async Task<ActionResult> UpdateAnnouncement([FromBody]AnnouncementRequest cnnouncementRequest, Guid announcementId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
@@ -86,7 +91,7 @@ namespace MessageBoard.Controllers
 		}
 
 		//DELETE api/announcements/5
-		[HttpDelete]
+		[HttpDelete("{announcementId}")]
 		public async Task<ActionResult> DeleteAnnouncement(Guid announcementId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
