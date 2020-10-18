@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace MessageBoard.Repositoryes
 {
-	public class UserRepository : IUserRepository<UserDto, UserDto>
+	public class UserRepository : IRepository<UserDto, UserDto, UserDto>
 	{
 		private readonly IMapper _mapper;
 		private readonly ApplicationContext _context;

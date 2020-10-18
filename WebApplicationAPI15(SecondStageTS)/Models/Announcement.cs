@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MessageBoard.Models
-{
+{	
 	public class Announcement
 	{
 		public Guid Id { get; set; } = Guid.NewGuid();

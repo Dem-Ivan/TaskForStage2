@@ -17,7 +17,7 @@ using System.Threading;
 
 namespace MessageBoard.Repositoryes
 {
-	public class AnnouncementRepository : IAnnRepository<AnnouncementRespons, AnnouncementRequest>
+	public class AnnouncementRepository : IRepository<AnnouncementRespons, AddAnntRequest, UpdateAnntRequest>
 	{
 		private readonly ApplicationContext _context;	
 		private readonly IMapper _mapper;
@@ -73,9 +73,9 @@ namespace MessageBoard.Repositoryes
 
 			return announcementDTO;
 		}
-		public async Task<Guid> CreateObject(AnnouncementRequest item, Guid Id, CancellationToken cancellationToken)
+		public async Task<Guid> CreateObject(AddAnntRequest item,  CancellationToken cancellationToken)//Guid Id,
 		{
-			var user = await _context.Set<User>().Where(x => x.Id == Id).FirstOrDefaultAsync(cancellationToken);
+			var user = await _context.Set<User>().Where(x => x.Id == item.UserId).FirstOrDefaultAsync(cancellationToken);
 			Announcement announcement = null;
 			if (user.NotFound()) throw new ObjectNotFoundException();
 
@@ -83,7 +83,7 @@ namespace MessageBoard.Repositoryes
 			{
 				try
 				{
-					if (_context.Set<Announcement>().Where(an => an.UserId == Id && !an.IsDeleted).Count() >= _userOptions.Value.MaxAnnouncementCount)
+					if (_context.Set<Announcement>().Where(an => an.UserId == item.UserId && !an.IsDeleted).Count() >= _userOptions.Value.MaxAnnouncementCount)
 					{
 						throw new MaxAnnouncementCountException($"Превышено максимальное колличество объяалений!");
 					}
@@ -92,23 +92,23 @@ namespace MessageBoard.Repositoryes
 
 					await _context.AddAsync<Announcement>(announcement, cancellationToken);
 
-					await transaction.CommitAsync();
+					await transaction.CommitAsync(cancellationToken);
 					await _context.SaveChangesAsync(cancellationToken);					
 				}				
 				catch (MaxAnnouncementCountException e)
 				{
-					await transaction.RollbackAsync();
+					await transaction.RollbackAsync(cancellationToken);
 					_logger.Log(LogLevel.Warning, "Some Exception in AddAnnouncement() {0}", e);					
 				}
 				catch (Exception e)
 				{
-					await transaction.RollbackAsync();
+					await transaction.RollbackAsync(cancellationToken);
 					_logger.Log(LogLevel.Warning, "Some Exception in AddAnnouncement() {0}", e);					
 				}							
 			}
 			return (announcement.Id);
 		}
-		public async Task<Guid> UpdateObject(AnnouncementRequest item, Guid Id, CancellationToken cancellationToken)
+		public async Task<Guid> UpdateObject(UpdateAnntRequest item, Guid Id, CancellationToken cancellationToken)
 		{
 			Announcement announcement = await _context.Set<Announcement>().Include(u => u.User).SingleOrDefaultAsync(an => an.Id == Id);
 

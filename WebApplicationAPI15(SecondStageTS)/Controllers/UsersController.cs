@@ -14,9 +14,9 @@ namespace MessageBoard.Controllers
 	public class UsersController : ControllerBase
 	{		
 		
-		private readonly IUserRepository<UserDto, UserDto> _repository;
+		private readonly IRepository<UserDto, UserDto, UserDto> _repository;
 
-		public UsersController(IUserRepository<UserDto, UserDto> repository)
+		public UsersController(IRepository<UserDto, UserDto, UserDto> repository)
 		{
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 		}

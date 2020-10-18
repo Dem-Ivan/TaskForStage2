@@ -17,14 +17,12 @@ namespace MessageBoard.Controllers
 	public class AnnouncementsController : ControllerBase
 	{
 		private readonly IRecaptchaService _recaptcha;		
-		private readonly IAnnRepository<AnnouncementRespons, AnnouncementRequest> _repository;
-		private readonly ApplicationContext _context;
+		private readonly IRepository<AnnouncementRespons, AddAnntRequest, UpdateAnntRequest> _repository;		
 
-		public AnnouncementsController( IRecaptchaService recaptcha, IAnnRepository<AnnouncementRespons, AnnouncementRequest> repository, ApplicationContext context)
+		public AnnouncementsController( IRecaptchaService recaptcha, IRepository<AnnouncementRespons, AddAnntRequest, UpdateAnntRequest> repository, ApplicationContext context)
 		{
 			_recaptcha = recaptcha ?? throw new ArgumentNullException(nameof(recaptcha));
-			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
-			_context = context ?? throw new ArgumentNullException(nameof(context));
+			_repository = repository ?? throw new ArgumentNullException(nameof(repository));			
 		}
 
 		//GET api/announcements/1/5   
@@ -56,14 +54,14 @@ namespace MessageBoard.Controllers
 
 		//POST api/announcements
 		[HttpPost]
-		public async Task<ActionResult<Guid>> AddAnnouncement([FromBody]AnnouncementRequest announcementRequest, [FromQuery]Guid userId, CancellationToken cancellationToken = default)
+		public async Task<ActionResult<Guid>> AddAnnouncement([FromBody]AddAnntRequest announcementRequest,  CancellationToken cancellationToken = default)
 		{
 			var captchaResponse = await _recaptcha.Validate(Request.Form);
 			if (!captchaResponse.Success) throw new ReCaptchaErrorException("Не удалось пройти рекапчу, попробуйте снова!");
 			if (!ModelState.IsValid) return BadRequest();
 			try
 			{					
-				return StatusCode(201, await _repository.CreateObject(announcementRequest, userId, cancellationToken));				
+				return StatusCode(201, await _repository.CreateObject(announcementRequest, cancellationToken));				
 			}
 			catch (ReCaptchaErrorException e)
 			{
@@ -77,12 +75,12 @@ namespace MessageBoard.Controllers
 
 		//PUT api/announcements
 		[HttpPut("{announcementId}")]
-		public async Task<ActionResult> UpdateAnnouncement([FromBody]AnnouncementRequest cnnouncementRequest, Guid announcementId, CancellationToken cancellationToken = default)
+		public async Task<ActionResult> UpdateAnnouncement([FromBody]UpdateAnntRequest updateAnntRequest, Guid announcementId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
 			try
 			{							
-				return Ok(await _repository.UpdateObject(cnnouncementRequest, announcementId, cancellationToken));
+				return Ok(await _repository.UpdateObject(updateAnntRequest, announcementId, cancellationToken));
 			}
 			catch (ObjectNotFoundException)
 			{

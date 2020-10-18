@@ -15,8 +15,8 @@ namespace MessageBoard.Context
 		{
 			if (modelBuilder == null) throw new ArgumentNullException(nameof(modelBuilder));
 
-			modelBuilder.Entity<User>();
-			modelBuilder.Entity<Announcement>();
+			modelBuilder.Entity<User>().ToTable("Users");
+			modelBuilder.Entity<Announcement>().ToTable("Announcements"); ;
 			
 			modelBuilder.Entity<Announcement>()
 				.HasOne(u => u.User)
