@@ -17,7 +17,7 @@ using System.Threading;
 
 namespace MessageBoard.Repositoryes
 {
-	public class AnnouncementRepository : IRepository<AnnouncementRespons, AddAnntRequest, UpdateAnntRequest>
+	public class AnnouncementRepository : IRepository<AnnouncementResponse, AddAnntRequest, UpdateAnntRequest>
 	{
 		private readonly ApplicationContext _context;	
 		private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace MessageBoard.Repositoryes
 			_userOptions = userOptions ?? throw new ArgumentNullException(nameof(userOptions));																			  
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
-		public async Task<GetResult<AnnouncementRespons>> GetObjectList(QueryData queryData, int page, int pageSize, CancellationToken cancellationToken)
+		public async Task<GetResult<AnnouncementResponse>> GetObjectList(QueryData queryData, int page, int pageSize, CancellationToken cancellationToken)
 		{
 			IQueryable<Announcement> announcementsQuery = _context.Set<Announcement>().Where(an => an.IsDeleted == false);
 			
@@ -47,16 +47,16 @@ namespace MessageBoard.Repositoryes
 
 			if ("ORDERNUMBER".StartsWith(queryData.SortName.ToUpper()))
 			{
-				announcementsQuery = announcementsQuery.GetSortBy(x => x.OrderNumber, queryData.sortDirection);
+				announcementsQuery = announcementsQuery.GetSortBy(x => x.OrderNumber, queryData.SortDirection);
 			}
 			else if ("RATING".StartsWith(queryData.SortName.ToUpper()))
 			{
-				announcementsQuery = announcementsQuery.GetSortBy(x => x.Rating, queryData.sortDirection);
+				announcementsQuery = announcementsQuery.GetSortBy(x => x.Rating, queryData.SortDirection);
 			}
-			else announcementsQuery = announcementsQuery.GetSortBy(x => x.CreationDate, queryData.sortDirection);
+			else announcementsQuery = announcementsQuery.GetSortBy(x => x.CreationDate, queryData.SortDirection);
 			
-			PagedResult<AnnouncementRespons> pagedResult = await announcementsQuery.GetPaged<AnnouncementRespons, Announcement>(page, pageSize, _mapper, cancellationToken);
-			GetResult<AnnouncementRespons> result = new GetResult<AnnouncementRespons>
+			PagedResult<AnnouncementResponse> pagedResult = await announcementsQuery.GetPaged<AnnouncementResponse, Announcement>(page, pageSize, _mapper, cancellationToken);
+			GetResult<AnnouncementResponse> result = new GetResult<AnnouncementResponse>
 			{
 				Data = pagedResult.Result,
 				Count = pagedResult.RowCount
@@ -64,16 +64,16 @@ namespace MessageBoard.Repositoryes
 
 			return result;
 		}
-		public async Task<AnnouncementRespons> GetObject(Guid Id, CancellationToken cancellationToken)
+		public async Task<AnnouncementResponse> GetObject(Guid id, CancellationToken cancellationToken)
 		{					
-			var query = _context.Set<Announcement>().Where(an => an.Id == Id && an.IsDeleted == false);
-			var announcementDTO = await _mapper.ProjectTo<AnnouncementRespons>(query).SingleOrDefaultAsync(cancellationToken);			
+			var query = _context.Set<Announcement>().Where(an => an.Id == id && an.IsDeleted == false);
+			var announcementDto = await _mapper.ProjectTo<AnnouncementResponse>(query).SingleOrDefaultAsync(cancellationToken);			
 
-			if (announcementDTO == null) throw new ObjectNotFoundException();
+			if (announcementDto == null) throw new ObjectNotFoundException();
 
-			return announcementDTO;
+			return announcementDto;
 		}
-		public async Task<Guid> CreateObject(AddAnntRequest item,  CancellationToken cancellationToken)//Guid Id,
+		public async Task<Guid> CreateObject(AddAnntRequest item,  CancellationToken cancellationToken)
 		{
 			var user = await _context.Set<User>().Where(x => x.Id == item.UserId).FirstOrDefaultAsync(cancellationToken);
 			Announcement announcement = null;
@@ -90,7 +90,7 @@ namespace MessageBoard.Repositoryes
 					announcement = _mapper.Map<Announcement>(item);
 					announcement.User = user;
 
-					await _context.AddAsync<Announcement>(announcement, cancellationToken);
+					await _context.AddAsync(announcement, cancellationToken);
 
 					await transaction.CommitAsync(cancellationToken);
 					await _context.SaveChangesAsync(cancellationToken);					
@@ -106,29 +106,29 @@ namespace MessageBoard.Repositoryes
 					_logger.Log(LogLevel.Warning, "Some Exception in AddAnnouncement() {0}", e);					
 				}							
 			}
-			return (announcement.Id);
+			return announcement.Id;
 		}
-		public async Task<Guid> UpdateObject(UpdateAnntRequest item, Guid Id, CancellationToken cancellationToken)
+		public async Task<Guid> UpdateObject(UpdateAnntRequest item, Guid id, CancellationToken cancellationToken)
 		{
-			Announcement announcement = await _context.Set<Announcement>().Include(u => u.User).SingleOrDefaultAsync(an => an.Id == Id);
+			Announcement announcement = await _context.Set<Announcement>().Include(u => u.User).SingleOrDefaultAsync(an => an.Id == id);
 
 			if (announcement.NotFound()) throw new ObjectNotFoundException();
 
 			_mapper.Map(item, announcement);
-			_context.Update<Announcement>(announcement);			
+			_context.Update(announcement);			
 			await _context.SaveChangesAsync(cancellationToken);
 
 			return announcement.Id;
 		}
-		public async Task<Guid> DeleteObject(Guid Id, CancellationToken cancellationToken)
+		public async Task<Guid> DeleteObject(Guid id, CancellationToken cancellationToken)
 		{		
-			Announcement announcement = await _context.Set<Announcement>().SingleOrDefaultAsync(an => an.Id == Id, cancellationToken);
+			Announcement announcement = await _context.Set<Announcement>().SingleOrDefaultAsync(an => an.Id == id, cancellationToken);
 
 			if (announcement.NotFound()) throw new ObjectNotFoundException();
 
 			announcement.IsDeleted = true;
 			await _context.SaveChangesAsync(cancellationToken);
-			return (announcement.Id);
+			return announcement.Id;
 		}			
 	}
 }

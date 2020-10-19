@@ -12,9 +12,13 @@ namespace MessageBoard.Repositoryes
 		where TV : class
 	{
 		Task<GetResult<T>> GetObjectList(QueryData queryData, int page, int pageSize, CancellationToken cancellationToken);
-		Task<T> GetObject(Guid Id, CancellationToken cancellationToken);
+
+		Task<T> GetObject(Guid id, CancellationToken cancellationToken);
+
 		Task<Guid> CreateObject(TU item, CancellationToken cancellationToken);
-		Task<Guid> UpdateObject(TV item, Guid Id, CancellationToken cancellationToken);
-		Task<Guid> DeleteObject(Guid Id, CancellationToken cancellationToken);
+
+		Task<Guid> UpdateObject(TV item, Guid id, CancellationToken cancellationToken);
+
+		Task<Guid> DeleteObject(Guid id, CancellationToken cancellationToken);
 	}
 }

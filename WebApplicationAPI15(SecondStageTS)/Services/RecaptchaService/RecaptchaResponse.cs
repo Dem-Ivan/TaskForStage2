@@ -10,6 +10,6 @@ namespace MessageBoard.Services.RecaptchaService
 		public bool Success { get; set; }
 
 		[JsonProperty("error-code")]
-		public List<string> ErrorCodes { get; set; }
+		public List<string> ErrorCodes { get;}
 	}
 }

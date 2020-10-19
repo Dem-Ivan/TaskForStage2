@@ -11,6 +11,6 @@ namespace MessageBoard.utils
 
 		public string SortName { get; set; } = "CreationDate";
 
-		public SortDirection? sortDirection { get; set; } = SortDirection.Asc;
+		public SortDirection? SortDirection { get; set; } = Sort.SortDirection.Asc;
 	}
 }

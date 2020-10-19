@@ -26,14 +26,14 @@ namespace MessageBoard.Controllers
 		public async Task<ActionResult<GetResult<UserDto>>> GetUsers([FromQuery] QueryData queryData, int page = 1, int pageSize = 25, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
-		
+
 			return Ok(await _repository.GetObjectList(queryData, page, pageSize, cancellationToken));
-			
+
 		}
-		
+
 		// GET: api/Users/5
 		[HttpGet("{userId}")]
-		public async Task<ActionResult<UserDto>> GetUser(Guid userId, CancellationToken cancellationToken = default)
+		public async Task<ActionResult<UserDto>> GetUserById(Guid userId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
 			try

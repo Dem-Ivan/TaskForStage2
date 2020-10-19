@@ -8,7 +8,6 @@ using MessageBoard.utils;
 using MessageBoard.Repositoryes;
 using MessageBoard.ProgectExceptions;
 using System.Threading;
-using MessageBoard.Context;
 
 namespace MessageBoard.Controllers
 {
@@ -17,9 +16,9 @@ namespace MessageBoard.Controllers
 	public class AnnouncementsController : ControllerBase
 	{
 		private readonly IRecaptchaService _recaptcha;		
-		private readonly IRepository<AnnouncementRespons, AddAnntRequest, UpdateAnntRequest> _repository;		
+		private readonly IRepository<AnnouncementResponse, AddAnntRequest, UpdateAnntRequest> _repository;		
 
-		public AnnouncementsController( IRecaptchaService recaptcha, IRepository<AnnouncementRespons, AddAnntRequest, UpdateAnntRequest> repository, ApplicationContext context)
+		public AnnouncementsController( IRecaptchaService recaptcha, IRepository<AnnouncementResponse, AddAnntRequest, UpdateAnntRequest> repository)
 		{
 			_recaptcha = recaptcha ?? throw new ArgumentNullException(nameof(recaptcha));
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));			
@@ -27,19 +26,18 @@ namespace MessageBoard.Controllers
 
 		//GET api/announcements/1/5   
 		[HttpGet("{page}/{pageSize}")]
-		public async Task<ActionResult<GetResult<AnnouncementRespons>>> GetAnnouncements([FromQuery] QueryData queryData, int page = 1, int pageSize = 25, CancellationToken cancellationToken = default)
+		public async Task<ActionResult<GetResult<AnnouncementResponse>>> GetAnnouncements([FromQuery] QueryData queryData, int page = 1, int pageSize = 25, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
 
-			return Ok(await _repository.GetObjectList(queryData, page, pageSize, cancellationToken));		
-			//var annn = _context.Announcements.FromSqlRaw("SELECT * FROM public.\"Announcements\"");
-			//var ann = _context.Announcements.FromSqlRaw("qwe").ToList();			
+			return Ok(await _repository.GetObjectList(queryData, page, pageSize, cancellationToken));	
+					
 		}
 
 
 		//GET api/announcements/5     
 		[HttpGet("{announcementId}")]
-		public async Task<ActionResult<AnnouncementRespons>> GetAnnouncement(Guid announcementId, CancellationToken cancellationToken = default)
+		public async Task<ActionResult<AnnouncementResponse>> GetAnnouncement(Guid announcementId, CancellationToken cancellationToken = default)
 		{
 			if (!ModelState.IsValid) return BadRequest();
 			try

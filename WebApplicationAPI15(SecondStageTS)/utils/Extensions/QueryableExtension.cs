@@ -16,10 +16,12 @@ namespace MessageBoard.utils.Paging
 			where T : class
 			where TKey : class
 		{
-			var pagedResult = new PagedResult<T>();
-			pagedResult.CurrentPage = page;
-			pagedResult.PageSize = pageSize;
-			pagedResult.RowCount = objects.Count();
+			var pagedResult = new PagedResult<T>
+			{
+				CurrentPage = page,
+				PageSize = pageSize,
+				RowCount = objects.Count()
+			};
 
 			var pageCount = (double)pagedResult.RowCount / pageSize;
 			pagedResult.PageCount = (int)Math.Ceiling(pageCount);
@@ -46,12 +48,11 @@ namespace MessageBoard.utils.Paging
 		public static IQueryable<T> SearchForMatches<T>(this IQueryable<T> objects, string searchString) where T : Announcement
 		{
 			objects = objects.Where(s =>
-				EF.Functions.ILike(s.Text.ToUpper(), $"%{searchString}%") ||
-				EF.Functions.ILike(s.User.Name.ToUpper(), $"%{searchString}%") ||
+				EF.Functions.ILike(s.Text, $"%{searchString}%") ||
+				EF.Functions.ILike(s.User.Name, $"%{searchString}%") ||
 				EF.Functions.ILike(s.OrderNumber.ToString(), $"%{searchString}%") ||
 				EF.Functions.ILike(s.Rating.ToString(), $"%{searchString}%") ||
-				EF.Functions.ILike(s.CreationDate.ToString(), $"%{searchString}%")
-				//(EF.Functions.Like(s.CreationDate.ToString("d", DateTimeFormatInfo.InvariantInfo), $"%{searchString}%"))
+				EF.Functions.ILike(s.CreationDate.ToString(), $"%{searchString}%")				
 				);
 			
 			return objects;

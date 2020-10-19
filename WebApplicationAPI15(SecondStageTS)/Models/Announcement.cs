@@ -21,6 +21,7 @@ namespace MessageBoard.Models
 		public int Rating { get; set; }
 
 		public DateTime CreationDate { get; set; } = DateTime.Now;
+
 		public bool IsDeleted { get; set; } = false;
 	}
 }

@@ -34,7 +34,7 @@ namespace MessageBoard
 			services.Configure<ReCaptchaOptions>(Configuration.GetSection("ReCaptcha"));
 			services.Configure<UserOptions>(Configuration);
 			services.AddHttpClient<IRecaptchaService, GoogleRecaptchaService>();
-			services.AddScoped<IRepository<AnnouncementRespons, AddAnntRequest, UpdateAnntRequest>, AnnouncementRepository>();
+			services.AddScoped<IRepository<AnnouncementResponse, AddAnntRequest, UpdateAnntRequest>, AnnouncementRepository>();
 			services.AddScoped<IRepository<UserDto, UserDto, UserDto>, UserRepository>();
 		}
 		public void Configure(IApplicationBuilder app)
